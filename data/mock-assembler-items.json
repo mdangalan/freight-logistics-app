@@ -1,0 +1,115 @@
+[
+  {
+    "id": "item-preview-incomplete",
+    "title": "Need 4 pallets collected from Northwind…",
+    "needsHuman": false,
+    "humanReason": "",
+    "message": "Hi, this is Maya at Northwind Packaging. We need 4 pallets of cartons collected from our Shah Alam plant and delivered to 12 Dock Street, Penang. Pickup 2026-10-22. Total weight 450 kg.",
+    "reply": "Thanks, Maya. I have the customer, both addresses, pickup date, goods, and pallet count. The total weight might be per pallet or for the whole shipment — can you confirm whether 450 kg is the full load?",
+    "form": {
+      "customerName": {
+        "status": "filled",
+        "value": "Northwind Packaging",
+        "note": ""
+      },
+      "pickupAddress": {
+        "status": "filled",
+        "value": "Northwind plant, Shah Alam",
+        "note": ""
+      },
+      "pickupDate": {
+        "status": "filled",
+        "value": "2026-10-22",
+        "note": ""
+      },
+      "deliveryAddress": {
+        "status": "filled",
+        "value": "12 Dock Street, Penang",
+        "note": ""
+      },
+      "goodsDescription": {
+        "status": "filled",
+        "value": "Cartons of printed packaging",
+        "note": ""
+      },
+      "palletCount": {
+        "status": "filled",
+        "value": "4",
+        "note": ""
+      },
+      "totalWeightKg": {
+        "status": "unclear",
+        "value": "450",
+        "note": "Could be per pallet or the whole shipment"
+      }
+    },
+    "formStatus": "incomplete",
+    "createdAt": "2026-10-18T14:32:00.000Z"
+  },
+  {
+    "id": "item-preview-complete",
+    "title": "Book road freight — Harbour & Co…",
+    "needsHuman": false,
+    "humanReason": "",
+    "message": "Please arrange road freight for Harbour & Co: pickup 88 Industrial Loop, Johor Bahru on 15 October 2026, deliver to KLIA cargo village. 2 pallets of exhibition displays, 320 kg total for the shipment.",
+    "reply": "Here is what I have — please ask the customer to confirm all seven details are correct before we proceed.",
+    "form": {
+      "customerName": {
+        "status": "filled",
+        "value": "Harbour & Co",
+        "note": ""
+      },
+      "pickupAddress": {
+        "status": "filled",
+        "value": "88 Industrial Loop, Johor Bahru",
+        "note": ""
+      },
+      "pickupDate": {
+        "status": "filled",
+        "value": "2026-10-15",
+        "note": ""
+      },
+      "deliveryAddress": {
+        "status": "filled",
+        "value": "KLIA cargo village",
+        "note": ""
+      },
+      "goodsDescription": {
+        "status": "filled",
+        "value": "Exhibition displays",
+        "note": ""
+      },
+      "palletCount": {
+        "status": "filled",
+        "value": "2",
+        "note": ""
+      },
+      "totalWeightKg": {
+        "status": "filled",
+        "value": "320",
+        "note": ""
+      }
+    },
+    "formStatus": "complete",
+    "createdAt": "2026-10-18T13:05:00.000Z"
+  },
+  {
+    "id": "item-preview-amber",
+    "title": "Need guaranteed delivery by Friday…",
+    "needsHuman": true,
+    "humanReason": "Customer asked for a guaranteed delivery date",
+    "message": "We need this on site by Friday with a guaranteed delivery time — can you commit? Also it's lithium batteries on 6 pallets.",
+    "reply": "",
+    "form": {
+      "customerName": { "status": "missing", "value": "", "note": "" },
+      "pickupAddress": { "status": "missing", "value": "", "note": "" },
+      "pickupDate": { "status": "missing", "value": "", "note": "" },
+      "deliveryAddress": { "status": "missing", "value": "", "note": "" },
+      "goodsDescription": { "status": "missing", "value": "", "note": "" },
+      "palletCount": { "status": "missing", "value": "", "note": "" },
+      "totalWeightKg": { "status": "missing", "value": "", "note": "" }
+    },
+    "formStatus": "incomplete",
+    "createdAt": "2026-10-18T11:20:00.000Z"
+  }
+]
