@@ -130,3 +130,5 @@ Seed fictional profiles and prior bookings for POC scenarios.
 ## Notes
 
 POC control test: no wrong-customer history disclosure.
+
+The first build ships three fictional customers and their past bookings in `freight-logistics-app/data/dummy/customers.json` (Northwind Packaging, Harbour & Co, New Pier Studio). That file is reference data for the Assembler prompt. Matching, ambiguous-match review, and “propose, don’t confirm” stay in this feature. See [the POC technical spec](../POC%20Spec/POC-Technical-Spec.md).

@@ -124,4 +124,4 @@ N/A for new tables.
 
 Example from brief: “450 kg” must not become confirmed total if per-pallet vs total is unclear.
 
-The first-build demo uses one assistant and a fixed seven-item form, checked in the app, with no field-by-field proof. That behavior is specified in [the POC technical spec](../POC%20Spec/POC-Technical-Spec.md). This feature stays the later assembler: provenance, history proposals, and carrier-specific required fields (F1, F6, F10).
+The first-build demo is the Assembler sidebar screen: one chat send creates one item, a project prompt plus that chat text goes to OpenAI, and the app checks a fixed seven-field form. Details are in [the POC technical spec](../POC%20Spec/POC-Technical-Spec.md). This feature stays the later assembler: provenance, history proposals, and carrier-specific required fields (F1, F6, F10).

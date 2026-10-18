@@ -19,8 +19,8 @@ Freight Desk helps a small freight forwarder move from an incomplete customer sh
 - **Timeline:** Assignment deadline and delivery estimates provisional (not confirmed in baseline).
 - **Budget:** Not specified.
 - **Team:** Implementation capacity open; roles implied: booking coordinator, customer service representative, customer (simulated), engineering.
-- **Stack (current):** Next.js 16 app scaffold in `freight-logistics-app/`. The first POC calls OpenAI through the official `openai` package (`responses.create`, model `gpt-6-astra` unless `OPENAI_MODEL` is set) with `OPENAI_API_KEY` on the server. Persistence for that slice is a local JSON file. Hosting and the fuller agent architecture stay open.
-- **First build slice:** [POC technical spec](POC%20Spec/POC-Technical-Spec.md) — simulated inbox, multiple email threads, chat-style paste, one human-review color, one guardrail, and a fixed seven-item shipment form the assistant fills and the app checks. A completed form is the end of this slice. Full booking, carriers, history, and the separate assembler stay specified in `docs/features/` and are not in this first build.
+- **Stack (current):** Next.js 16 app scaffold in `freight-logistics-app/`. The interface uses [shadcn/ui](https://ui.shadcn.com/) (`components.json`, style `aria-nova`). The page uses Zustand for the open section, the selected item, and the visit-only API key. The first POC calls OpenAI through the official `openai` package (`responses.create`, model `gpt-6-astra` unless `OPENAI_MODEL` is set). The API key is typed in Settings for that visit and is not stored. Chat items sit in a local JSON file. Sample customers sit in another JSON file. There is no database in this slice. Hosting and the fuller agent architecture stay open.
+- **First build slice:** [POC technical spec](POC%20Spec/POC-Technical-Spec.md) — sidebar for Assembler, Clarification, Booking, and Settings; Assembler chat that creates a selectable item and a seven-field shipment form; visit-only API key; built-in sample customers and past bookings. Clarification and Booking screens are blank. Full matching, carriers, and booking stay specified in `docs/features/`.
 - **POC boundaries:** Domestic road freight, non-hazardous palletized goods, one shipment per inquiry; simulated email and carriers; no live email, attachments, payments, or post-booking tracking.
 
 ## Notion
@@ -91,7 +91,7 @@ Simulated elapsed-time results are demonstration evidence only.
 - [ ] Quote contents, expiry representation, and approval validity window.
 - [ ] Tie-breaking when two eligible services have equal total price.
 - [ ] Clarification escalation threshold and timing (configurable in principle).
-- [ ] Technical storage for the full product (database choice) and agent architecture (single orchestrator vs separate agents). The first POC uses a JSON file and one OpenAI Responses call per paste.
+- [ ] Technical storage for the full product (database choice) and agent architecture (single orchestrator vs separate agents). The first POC uses JSON files, one OpenAI Responses call per Assembler send, and a visit-only API key.
 - [ ] Assignment deadline and milestone dates.
 
 ## Change log
@@ -102,3 +102,6 @@ Simulated elapsed-time results are demonstration evidence only.
 | 2026-10-18 | Added the first-build POC spec: simulated multi-thread inbox, Cursor SDK, one human-review color, one guardrail. Features F1–F12 unchanged and still pending. |
 | 2026-10-18 | First-build POC now includes a fixed seven-item shipment form (name, pickup address, pickup date, delivery address, goods, pallet count, total weight). The assistant proposes each item; the app checks it and shows a completed form when all seven are filled. Unclear items stay on a green thread. F1–F12 remain pending. No database change. |
 | 2026-10-18 | The first-build assistant is OpenAI (`openai` Responses API, `OPENAI_API_KEY` on the server, model `gpt-6-astra` unless `OPENAI_MODEL` is set). The Cursor SDK call and local agent folder are removed from this slice. |
+| 2026-10-18 | First-build screen is a sidebar: Assembler, Clarification, Booking, and Settings. Assembler chat creates a selectable item and fills the seven-field form. The API key is typed each visit and not stored. Sample customers and past bookings ship in a JSON file. Clarification and Booking stay blank. F1–F12 remain pending. No database. |
+| 2026-10-18 | First-build UI uses shadcn/ui only ([ui.shadcn.com](https://ui.shadcn.com/)). Sidebar, buttons, fields, cards, and badges come from that library. |
+| 2026-10-18 | First-build page state uses Zustand (`useVisitStore`) for the open section, the selected Assembler item, and the visit-only API key. No persist. Items stay in the JSON file. |
