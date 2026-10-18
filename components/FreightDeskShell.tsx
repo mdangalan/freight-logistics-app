@@ -2,6 +2,7 @@
 
 import { AgentPlaceholder } from "@/components/AgentPlaceholder";
 import { AssemblerPanel } from "@/components/AssemblerPanel";
+import { ClarificationPanel } from "@/components/ClarificationPanel";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import {
   Sidebar,
@@ -50,7 +51,7 @@ function MainWindow() {
     case "assembler":
       return <AssemblerPanel />;
     case "clarification":
-      return <AgentPlaceholder agentName="Clarification Agent" />;
+      return <ClarificationPanel />;
     case "booking":
       return <AgentPlaceholder agentName="Booking Agent" />;
     case "settings":

@@ -31,6 +31,29 @@ export type AssemblerItem = {
   createdAt: string;
 };
 
+export type ClarificationMessageRole = "assistant" | "customer";
+
+export type ClarificationMessage = {
+  id: string;
+  role: ClarificationMessageRole;
+  content: string;
+  sentAt: string;
+};
+
+export type InquiryStatus = "clarifying" | "awaiting_customer";
+
+export type ClarificationThread = {
+  id: string;
+  title: string;
+  needsHuman: boolean;
+  humanReason: string;
+  inquiryStatus: InquiryStatus;
+  form: ShipmentFormData;
+  formStatus: FormStatus;
+  messages: ClarificationMessage[];
+  createdAt: string;
+};
+
 export const FORM_FIELD_CATALOG: { key: FormFieldKey; label: string }[] = [
   { key: "customerName", label: "Customer name" },
   { key: "pickupAddress", label: "Pickup address" },
