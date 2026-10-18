@@ -1,0 +1,67 @@
+[
+  {
+    "id": "cust-northwind",
+    "name": "Northwind Packaging",
+    "contacts": [
+      {
+        "name": "Maya Chen",
+        "email": "maya@northwind-packaging.example"
+      }
+    ],
+    "bookings": [
+      {
+        "id": "bkg-nw-001",
+        "date": "2026-09-12",
+        "status": "confirmed",
+        "pickupAddress": "Lot 22, Jalan Industri 3, Shah Alam, Selangor",
+        "deliveryAddress": "18 Weld Quay, George Town, Penang",
+        "goodsDescription": "Cartons of printed packaging sleeves",
+        "palletCount": 6,
+        "totalWeightKg": 2100
+      },
+      {
+        "id": "bkg-nw-002",
+        "date": "2026-08-04",
+        "status": "confirmed",
+        "pickupAddress": "Lot 22, Jalan Industri 3, Shah Alam, Selangor",
+        "deliveryAddress": "7 Jalan Chan Sow Lin, Kuala Lumpur",
+        "goodsDescription": "Corrugated display cartons",
+        "palletCount": 3,
+        "totalWeightKg": 960
+      }
+    ]
+  },
+  {
+    "id": "cust-harbour",
+    "name": "Harbour & Co",
+    "contacts": [
+      {
+        "name": "James Ong",
+        "email": "james@harbour-co.example"
+      }
+    ],
+    "bookings": [
+      {
+        "id": "bkg-hb-001",
+        "date": "2026-07-21",
+        "status": "cancelled",
+        "pickupAddress": "88 Industrial Loop, Johor Bahru, Johor",
+        "deliveryAddress": "KLIA cargo village, Sepang, Selangor",
+        "goodsDescription": "Exhibition display kits",
+        "palletCount": 2,
+        "totalWeightKg": 320
+      }
+    ]
+  },
+  {
+    "id": "cust-newpier",
+    "name": "New Pier Studio",
+    "contacts": [
+      {
+        "name": "Aisha Rahman",
+        "email": "aisha@newpier.example"
+      }
+    ],
+    "bookings": []
+  }
+]

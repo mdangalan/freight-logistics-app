@@ -13,6 +13,7 @@ type AgentMessageComposerProps = {
   missingKeyContext?: string;
   placeholder?: string;
   hint?: string;
+  isSending?: boolean;
 };
 
 export function AgentMessageComposer({
@@ -23,6 +24,7 @@ export function AgentMessageComposer({
   missingKeyContext,
   placeholder = "Type the customer's message…",
   hint,
+  isSending = false,
 }: AgentMessageComposerProps) {
   return (
     <>
@@ -34,9 +36,15 @@ export function AgentMessageComposer({
         className="min-h-24 resize-y"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        disabled={isSending}
       />
       <div className="flex flex-wrap items-center gap-2">
-        <Button type="button" onPress={onSend}>
+        <Button
+          type="button"
+          onPress={onSend}
+          isPending={isSending}
+          isDisabled={isSending || !value.trim()}
+        >
           <SendIcon />
           Send
         </Button>

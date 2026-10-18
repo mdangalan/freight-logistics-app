@@ -64,6 +64,12 @@ export const FORM_FIELD_CATALOG: { key: FormFieldKey; label: string }[] = [
   { key: "totalWeightKg", label: "Total weight (kg)" },
 ];
 
+export const FORM_FIELD_KEYS: FormFieldKey[] = FORM_FIELD_CATALOG.map(
+  (field) => field.key
+);
+
+export const FIELD_STATUSES: FieldStatus[] = ["filled", "missing", "unclear"];
+
 const emptyField = (): FormField => ({
   status: "missing",
   value: "",

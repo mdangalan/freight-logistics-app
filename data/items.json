@@ -1,0 +1,143 @@
+[
+  {
+    "id": "3b35d5a0-942f-4f51-adcf-85ed9a584764",
+    "title": "Hi, this is Maya at Northwind Packaging. We need 4 pallets of cartons c…",
+    "needsHuman": false,
+    "humanReason": "",
+    "message": "Hi, this is Maya at Northwind Packaging. We need 4 pallets of cartons collected from our Shah Alam plant and delivered to 12 Dock Street, Penang. Pickup 2026-10-22. Total weight 450 kg.\n\nThanks,\nMaya",
+    "reply": "Hi Maya, could you please provide the specific street address for the Shah Alam plant?",
+    "form": {
+      "customerName": {
+        "status": "filled",
+        "value": "Maya at Northwind Packaging",
+        "note": ""
+      },
+      "pickupAddress": {
+        "status": "unclear",
+        "value": "Shah Alam plant",
+        "note": "Street address is missing; site name and city only."
+      },
+      "pickupDate": {
+        "status": "filled",
+        "value": "2026-10-22",
+        "note": ""
+      },
+      "deliveryAddress": {
+        "status": "filled",
+        "value": "12 Dock Street, Penang",
+        "note": ""
+      },
+      "goodsDescription": {
+        "status": "filled",
+        "value": "cartons",
+        "note": ""
+      },
+      "palletCount": {
+        "status": "filled",
+        "value": "4",
+        "note": ""
+      },
+      "totalWeightKg": {
+        "status": "filled",
+        "value": "450",
+        "note": ""
+      }
+    },
+    "formStatus": "incomplete",
+    "createdAt": "2026-10-18T16:39:49.442Z"
+  },
+  {
+    "id": "4a2be232-1514-4ad6-91e1-7b2d6945288a",
+    "title": "Hi, this is Maya at Northwind Packaging. We need 4 pallets of cartons c…",
+    "needsHuman": true,
+    "humanReason": "The assistant could not answer.",
+    "message": "Hi, this is Maya at Northwind Packaging. We need 4 pallets of cartons collected from our Shah Alam plant and delivered to 12 Dock Street, Penang. Pickup 2026-10-22. Total weight 450 kg.\n\nThanks,\nMaya",
+    "reply": "",
+    "form": {
+      "customerName": {
+        "status": "missing",
+        "value": "",
+        "note": ""
+      },
+      "pickupAddress": {
+        "status": "missing",
+        "value": "",
+        "note": ""
+      },
+      "pickupDate": {
+        "status": "missing",
+        "value": "",
+        "note": ""
+      },
+      "deliveryAddress": {
+        "status": "missing",
+        "value": "",
+        "note": ""
+      },
+      "goodsDescription": {
+        "status": "missing",
+        "value": "",
+        "note": ""
+      },
+      "palletCount": {
+        "status": "missing",
+        "value": "",
+        "note": ""
+      },
+      "totalWeightKg": {
+        "status": "missing",
+        "value": "",
+        "note": ""
+      }
+    },
+    "formStatus": "incomplete",
+    "createdAt": "2026-10-18T16:18:05.427Z"
+  },
+  {
+    "id": "3fa6daa5-a237-46f2-9118-bb4b8067774c",
+    "title": "Hi, this is Maya at Northwind Packaging. We need 4 pallets of cartons c…",
+    "needsHuman": true,
+    "humanReason": "The assistant could not answer.",
+    "message": "Hi, this is Maya at Northwind Packaging. We need 4 pallets of cartons collected from our Shah Alam plant and delivered to 12 Dock Street, Penang. Pickup 2026-10-22. Total weight 450 kg.\n\nThanks,\nMaya",
+    "reply": "",
+    "form": {
+      "customerName": {
+        "status": "missing",
+        "value": "",
+        "note": ""
+      },
+      "pickupAddress": {
+        "status": "missing",
+        "value": "",
+        "note": ""
+      },
+      "pickupDate": {
+        "status": "missing",
+        "value": "",
+        "note": ""
+      },
+      "deliveryAddress": {
+        "status": "missing",
+        "value": "",
+        "note": ""
+      },
+      "goodsDescription": {
+        "status": "missing",
+        "value": "",
+        "note": ""
+      },
+      "palletCount": {
+        "status": "missing",
+        "value": "",
+        "note": ""
+      },
+      "totalWeightKg": {
+        "status": "missing",
+        "value": "",
+        "note": ""
+      }
+    },
+    "formStatus": "incomplete",
+    "createdAt": "2026-10-18T16:11:45.782Z"
+  }
+]

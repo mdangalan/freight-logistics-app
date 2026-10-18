@@ -11,7 +11,7 @@ export function MissingApiKeyAlert({ context }: MissingApiKeyAlertProps) {
       <AlertCircleIcon />
       <AlertTitle>API key missing</AlertTitle>
       <AlertDescription>
-        Add your OpenAI key in Settings before sending.
+        Add your API key in Settings before sending.
         {context ? ` ${context}` : null}
       </AlertDescription>
     </Alert>
