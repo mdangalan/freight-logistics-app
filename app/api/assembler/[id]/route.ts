@@ -1,5 +1,6 @@
 import { connection } from "next/server";
 
+import { jsonError, jsonResult, parsePatchAction, readJsonBody } from "@/lib/http";
 import { clearHumanFlag, getItem } from "@/lib/items/store";
 
 type ItemRouteContext = {
@@ -7,44 +8,31 @@ type ItemRouteContext = {
 };
 
 export async function GET(_request: Request, context: ItemRouteContext) {
-  await connection();
+  const connectionPromise = connection();
   const { id } = await context.params;
-  const item = await getItem(id);
+  const itemPromise = getItem(id);
+  await connectionPromise;
+  const item = await itemPromise;
   if (!item) {
-    return Response.json({ error: "not_found" }, { status: 404 });
+    return jsonError("not_found", 404);
   }
-  return Response.json(
-    { item },
-    { headers: { "Cache-Control": "no-store" } }
-  );
+  return jsonResult({ item });
 }
 
 export async function PATCH(request: Request, context: ItemRouteContext) {
-  await connection();
-  const { id } = await context.params;
+  const connectionPromise = connection();
+  const paramsPromise = context.params;
+  const parsedBody = await readJsonBody(request);
+  const body = parsedBody.ok ? parsedBody.body : {};
 
-  let body: unknown = {};
-  try {
-    body = await request.json();
-  } catch {
-    body = {};
+  if (parsePatchAction(body) !== "clearHumanFlag") {
+    return jsonError("unsupported_action", 400);
   }
 
-  const action =
-    body && typeof body === "object" && "action" in body
-      ? (body as { action?: unknown }).action
-      : undefined;
-
-  if (action !== "clearHumanFlag") {
-    return Response.json({ error: "unsupported_action" }, { status: 400 });
-  }
-
+  const [{ id }] = await Promise.all([paramsPromise, connectionPromise]);
   const item = await clearHumanFlag(id);
   if (!item) {
-    return Response.json({ error: "not_found" }, { status: 404 });
+    return jsonError("not_found", 404);
   }
-  return Response.json(
-    { item },
-    { headers: { "Cache-Control": "no-store" } }
-  );
+  return jsonResult({ item });
 }

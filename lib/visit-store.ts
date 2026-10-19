@@ -15,15 +15,16 @@ export type VisitSection =
   | "settings";
 
 function newestFirst(items: AssemblerItem[]): AssemblerItem[] {
-  return [...items].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return items.toSorted((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 function newestThreads(threads: ClarificationThread[]): ClarificationThread[] {
-  return [...threads].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return threads.toSorted((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 type VisitState = {
   section: VisitSection;
+  visitedSections: VisitSection[];
   selectedItemId: string | null;
   selectedClarificationThreadId: string | null;
   llmProvider: LlmProvider;
@@ -44,13 +45,20 @@ type VisitState = {
 
 export const useVisitStore = create<VisitState>((set) => ({
   section: "assembler",
+  visitedSections: ["assembler"],
   selectedItemId: null,
   selectedClarificationThreadId: null,
   llmProvider: DEFAULT_LLM_PROVIDER,
   apiKey: "",
   items: [],
   clarificationThreads: [],
-  setSection: (section) => set({ section }),
+  setSection: (section) =>
+    set((state) => ({
+      section,
+      visitedSections: state.visitedSections.includes(section)
+        ? state.visitedSections
+        : [...state.visitedSections, section],
+    })),
   setSelectedItemId: (selectedItemId) => set({ selectedItemId }),
   setSelectedClarificationThreadId: (selectedClarificationThreadId) =>
     set({ selectedClarificationThreadId }),

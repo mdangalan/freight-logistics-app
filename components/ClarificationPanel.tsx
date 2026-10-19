@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { AgentDetailPlaceholder } from "@/components/agent/AgentDetailPlaceholder";
 import { AgentMessageComposer } from "@/components/agent/AgentMessageComposer";
 import { AgentPanelChrome } from "@/components/agent/AgentPanelChrome";
+import { AgentSendAlerts } from "@/components/agent/AgentSendAlerts";
 import { AgentThreadList } from "@/components/agent/AgentThreadList";
 import { ConversationTimeline } from "@/components/agent/ConversationTimeline";
 import { CustomerReplyComposer } from "@/components/agent/CustomerReplyComposer";
 import { HumanReviewHeader } from "@/components/agent/HumanReviewHeader";
+import { PendingSendTimeline } from "@/components/agent/PendingSendTimeline";
 import { ShipmentForm } from "@/components/ShipmentForm";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -20,7 +21,6 @@ import type {
   InquiryStatus,
 } from "@/lib/form/catalog";
 import { useVisitStore } from "@/lib/visit-store";
-import { AlertCircleIcon } from "lucide-react";
 
 function inquiryStatusLabel(status: InquiryStatus) {
   return status === "awaiting_customer" ? "Awaiting customer" : "Clarifying";
@@ -38,52 +38,60 @@ function threadTone(thread: ClarificationThread) {
   return "waiting" as const;
 }
 
+function clarificationListItems(threads: ClarificationThread[]) {
+  return threads.map((thread) => ({
+    id: thread.id,
+    title: thread.title,
+    subtitle: threadSubtitle(thread),
+    needsHuman: thread.needsHuman,
+    tone: threadTone(thread),
+    createdAt: thread.createdAt,
+  }));
+}
+
 function ClarificationThreadWindow({ thread }: { thread: ClarificationThread }) {
   const upsertThread = useVisitStore((s) => s.upsertClarificationThread);
-  const apiKey = useVisitStore((s) => s.apiKey);
-  const llmProvider = useVisitStore((s) => s.llmProvider);
   const [replyDraft, setReplyDraft] = useState("");
   const [replyMissingKeyAlert, setReplyMissingKeyAlert] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [clearing, setClearing] = useState(false);
   const [sendError, setSendError] = useState("");
   const [sendNotice, setSendNotice] = useState("");
   const [pendingTimeline, setPendingTimeline] = useState<
     ClarificationMessage[] | null
   >(null);
+  const sendingRef = useRef(false);
+  const clearingRef = useRef(false);
 
   const timelineMessages = pendingTimeline ?? thread.messages;
 
   async function handleClearHumanFlag() {
-    if (clearing) return;
-    setClearing(true);
+    if (clearingRef.current) return;
+    clearingRef.current = true;
     try {
-      const response = await fetch(
-        `/api/clarification/${thread.id}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "clearHumanFlag" }),
-        }
-      );
+      const response = await fetch(`/api/clarification/${thread.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "clearHumanFlag" }),
+      });
       if (!response.ok) return;
       const payload = (await response.json()) as {
         thread?: ClarificationThread;
       };
       if (payload.thread) upsertThread(payload.thread);
     } finally {
-      setClearing(false);
+      clearingRef.current = false;
     }
   }
 
   async function handleThreadReplySend() {
+    const { apiKey, llmProvider } = useVisitStore.getState();
     if (!apiKey.trim()) {
       setReplyMissingKeyAlert(true);
       setSendError("");
       return;
     }
     const message = replyDraft.trim();
-    if (!message || isSending) return;
+    if (!message || sendingRef.current) return;
     if (thread.needsHuman) {
       setSendError("");
       setSendNotice(
@@ -98,6 +106,7 @@ function ClarificationThreadWindow({ thread }: { thread: ClarificationThread }) 
       content: message,
       sentAt: new Date().toISOString(),
     };
+    sendingRef.current = true;
     setReplyMissingKeyAlert(false);
     setSendError("");
     setSendNotice("");
@@ -137,6 +146,7 @@ function ClarificationThreadWindow({ thread }: { thread: ClarificationThread }) 
     } catch {
       setSendError("The assistant could not answer. Try again.");
     } finally {
+      sendingRef.current = false;
       setIsSending(false);
       setPendingTimeline(null);
     }
@@ -153,22 +163,7 @@ function ClarificationThreadWindow({ thread }: { thread: ClarificationThread }) 
           isSending={isSending}
           hint="Reply as the customer. The agent updates this form from the reply and asks only about fields that are still missing, unclear, or in conflict."
         />
-        {sendError ? (
-          <Alert variant="destructive">
-            <AlertCircleIcon />
-            <AlertTitle>Send failed</AlertTitle>
-            <AlertDescription>{sendError}</AlertDescription>
-          </Alert>
-        ) : null}
-        {sendNotice ? (
-          <Alert className="border-amber-500/30 bg-amber-500/5">
-            <AlertCircleIcon className="text-amber-600" />
-            <AlertTitle className="text-amber-950 dark:text-amber-50">
-              No assistant reply
-            </AlertTitle>
-            <AlertDescription>{sendNotice}</AlertDescription>
-          </Alert>
-        ) : null}
+        <AgentSendAlerts error={sendError} notice={sendNotice} />
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto pt-4">
@@ -225,9 +220,8 @@ export function ClarificationPanel() {
   } | null>(null);
   const [sendError, setSendError] = useState("");
   const [sendNotice, setSendNotice] = useState("");
+  const sendingRef = useRef(false);
 
-  const apiKey = useVisitStore((s) => s.apiKey);
-  const llmProvider = useVisitStore((s) => s.llmProvider);
   const threads = useVisitStore((s) => s.clarificationThreads);
   const selectedClarificationThreadId = useVisitStore(
     (s) => s.selectedClarificationThreadId
@@ -245,6 +239,7 @@ export function ClarificationPanel() {
   const selectedThread =
     threads.find((thread) => thread.id === selectedClarificationThreadId) ??
     null;
+  const listItems = clarificationListItems(threads);
 
   useEffect(() => {
     let cancelled = false;
@@ -278,14 +273,16 @@ export function ClarificationPanel() {
   }, [setClarificationThreads, setSelectedClarificationThreadId]);
 
   async function handleNewThreadSend() {
+    const { apiKey, llmProvider } = useVisitStore.getState();
     if (!apiKey.trim()) {
       setNewThreadMissingKeyAlert(true);
       setSendError("");
       return;
     }
     const message = newThreadDraft.trim();
-    if (!message || isSending) return;
+    if (!message || sendingRef.current) return;
 
+    sendingRef.current = true;
     setNewThreadMissingKeyAlert(false);
     setSendError("");
     setSendNotice("");
@@ -326,6 +323,7 @@ export function ClarificationPanel() {
     } catch {
       setSendError("The assistant could not answer. Try again.");
     } finally {
+      sendingRef.current = false;
       setIsSending(false);
       setPendingSend(null);
     }
@@ -342,22 +340,7 @@ export function ClarificationPanel() {
         placeholder="Type or paste the simulated customer email…"
         hint="Send starts a new thread. The agent may only handle one domestic road shipment of ordinary palletized goods. It fills the form from the customer's words and asks for what is still missing or unclear."
       />
-      {sendError ? (
-        <Alert variant="destructive">
-          <AlertCircleIcon />
-          <AlertTitle>Send failed</AlertTitle>
-          <AlertDescription>{sendError}</AlertDescription>
-        </Alert>
-      ) : null}
-      {sendNotice ? (
-        <Alert className="border-amber-500/30 bg-amber-500/5">
-          <AlertCircleIcon className="text-amber-600" />
-          <AlertTitle className="text-amber-950 dark:text-amber-50">
-            No assistant reply
-          </AlertTitle>
-          <AlertDescription>{sendNotice}</AlertDescription>
-        </Alert>
-      ) : null}
+      <AgentSendAlerts error={sendError} notice={sendNotice} />
     </>
   );
 
@@ -365,14 +348,7 @@ export function ClarificationPanel() {
     <AgentPanelChrome title="Clarification Agent" preview={false} topBar={topBar}>
       <AgentThreadList
         listLabel="Threads"
-        items={threads.map((thread) => ({
-          id: thread.id,
-          title: thread.title,
-          subtitle: threadSubtitle(thread),
-          needsHuman: thread.needsHuman,
-          tone: threadTone(thread),
-          createdAt: thread.createdAt,
-        }))}
+        items={listItems}
         selectedId={selectedClarificationThreadId}
         onSelect={setSelectedClarificationThreadId}
         emptyMessage="No threads yet. Send a simulated customer email above to create one."
@@ -380,22 +356,11 @@ export function ClarificationPanel() {
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         {pendingSend ? (
-          <Card className="border-border/80 shadow-sm">
-            <CardContent>
-              <ConversationTimeline
-                messages={[
-                  {
-                    id: "pending-customer",
-                    role: "customer",
-                    content: pendingSend.content,
-                    sentAt: pendingSend.sentAt,
-                  },
-                ]}
-                agentLabel="Clarification agent"
-                awaitingReply
-              />
-            </CardContent>
-          </Card>
+          <PendingSendTimeline
+            content={pendingSend.content}
+            sentAt={pendingSend.sentAt}
+            agentLabel="Clarification agent"
+          />
         ) : selectedThread ? (
           <ClarificationThreadWindow
             key={selectedThread.id}

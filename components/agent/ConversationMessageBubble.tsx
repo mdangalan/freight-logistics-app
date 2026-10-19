@@ -13,9 +13,10 @@ type ConversationMessageBubbleProps = {
 
 function formatSentAt(iso: string) {
   try {
-    return new Intl.DateTimeFormat(undefined, {
+    return new Intl.DateTimeFormat("en-GB", {
       dateStyle: "medium",
       timeStyle: "short",
+      timeZone: "Asia/Kuala_Lumpur",
     }).format(new Date(iso));
   } catch {
     return iso;

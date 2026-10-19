@@ -3,12 +3,12 @@ import {
   CLARIFICATION_PROMPT,
   fillClarificationPrompt,
 } from "@/lib/agent/clarification/prompt";
-import { invokeCursorAssembler } from "@/lib/agent/cursorClient";
-import { invokeGeminiAssembler, logGeminiError } from "@/lib/agent/geminiClient";
 import { applyAssemblerGuardrail } from "@/lib/agent/guardrail";
-import { invokeOpenAiAssembler, logOpenAiError } from "@/lib/agent/openaiClient";
+import {
+  invokeAssemblerModel,
+  logAssemblerInvokeError,
+} from "@/lib/agent/invoke";
 import type { LlmProvider } from "@/lib/agent/provider";
-import type { AssemblerModelOutput } from "@/lib/agent/schema";
 import { sampleCustomersJson } from "@/lib/data/customers";
 import { checkAssemblerForm } from "@/lib/form/validate";
 import {
@@ -28,9 +28,11 @@ const CALLER = "Clarification";
 
 function customerTranscript(thread: ClarificationThread): string {
   return thread.messages
-    .filter((message) => message.role === "customer")
-    .map((message) => message.content.trim())
-    .filter(Boolean)
+    .flatMap((message) => {
+      if (message.role !== "customer") return [];
+      const content = message.content.trim();
+      return content ? [content] : [];
+    })
     .join("\n\n");
 }
 
@@ -74,31 +76,24 @@ async function callClarificationModel(
   apiKey: string,
   thread: ClarificationThread,
   latestMessage: string
-): Promise<AssemblerModelOutput> {
-  const instructions = fillClarificationPrompt(
-    CLARIFICATION_PROMPT,
+) {
+  return invokeAssemblerModel(
+    provider,
+    apiKey,
     latestMessage,
-    transcriptForPrompt(thread),
-    JSON.stringify(
-      { formStatus: thread.formStatus, form: thread.form },
-      null,
-      2
-    ),
-    sampleCustomersJson()
-  );
-
-  if (provider === "cursor") {
-    return invokeCursorAssembler(apiKey, instructions);
-  }
-  if (provider === "openai") {
-    return invokeOpenAiAssembler(
-      apiKey,
+    fillClarificationPrompt(
+      CLARIFICATION_PROMPT,
       latestMessage,
-      instructions,
-      CALLER
-    );
-  }
-  return invokeGeminiAssembler(apiKey, latestMessage, instructions, CALLER);
+      transcriptForPrompt(thread),
+      JSON.stringify(
+        { formStatus: thread.formStatus, form: thread.form },
+        null,
+        2
+      ),
+      sampleCustomersJson()
+    ),
+    CALLER
+  );
 }
 
 async function applyClarificationTurn(
@@ -148,21 +143,7 @@ async function applyClarificationTurn(
       formStatus: merged.formStatus,
     });
   } catch (error) {
-    if (args.provider === "openai") {
-      logOpenAiError(
-        error,
-        process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini",
-        CALLER
-      );
-    } else if (args.provider === "cursor") {
-      console.error("Clarification Cursor call failed", error);
-    } else {
-      logGeminiError(
-        error,
-        process.env.GEMINI_MODEL?.trim() || "gemini-3.8-flash",
-        CALLER
-      );
-    }
+    await logAssemblerInvokeError(args.provider, error, CALLER);
     return saveThread(
       amberThread(thread, UNREADABLE_REASON, args.resetFormOnFailure)
     );

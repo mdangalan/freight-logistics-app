@@ -27,7 +27,7 @@ export function ThreadListRow({
       type="button"
       onClick={onSelect}
       className={cn(
-        "flex w-full gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors hover:bg-muted/60",
+        "flex w-full gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors [content-visibility:auto] [contain-intrinsic-size:auto_3.5rem] hover:bg-muted/60",
         isSelected ? "border-primary/40 bg-muted/80" : "border-transparent"
       )}
     >

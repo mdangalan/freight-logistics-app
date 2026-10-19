@@ -83,7 +83,7 @@ async function writeThreadsFile(threads: ClarificationThread[]): Promise<void> {
 }
 
 function newestFirst(threads: ClarificationThread[]): ClarificationThread[] {
-  return [...threads].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return threads.toSorted((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 async function readThreadsFile(): Promise<ClarificationThread[]> {

@@ -1,11 +1,10 @@
 "use client";
 
-import type { ReactNode } from "react";
+import dynamic from "next/dynamic";
+import { Activity, startTransition, type ReactNode } from "react";
 
-import { AgentPlaceholder } from "@/components/AgentPlaceholder";
 import { AssemblerPanel } from "@/components/AssemblerPanel";
-import { ClarificationPanel } from "@/components/ClarificationPanel";
-import { SettingsPanel } from "@/components/SettingsPanel";
+
 import {
   Sidebar,
   SidebarContent,
@@ -22,6 +21,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { type VisitSection, useVisitStore } from "@/lib/visit-store";
 import {
   BotIcon,
@@ -46,13 +46,73 @@ const NAV: {
   { section: "settings", label: "Settings", icon: SettingsIcon },
 ];
 
-function KeepAlivePanel({
-  active,
+const NAV_BY_SECTION = new Map(NAV.map((item) => [item.section, item]));
+
+const PANEL_IMPORTS = {
+  assembler: () => import("@/components/AssemblerPanel"),
+  clarification: () => import("@/components/ClarificationPanel"),
+  booking: () => import("@/components/AgentPlaceholder"),
+  settings: () => import("@/components/SettingsPanel"),
+} as const;
+
+function PanelFallback() {
+  return (
+    <div className="flex min-h-0 flex-1 items-center justify-center p-8">
+      <Skeleton className="h-32 w-full max-w-md" />
+    </div>
+  );
+}
+
+const ClarificationPanel = dynamic(
+  () =>
+    import("@/components/ClarificationPanel").then((mod) => ({
+      default: mod.ClarificationPanel,
+    })),
+  { loading: PanelFallback }
+);
+const AgentPlaceholder = dynamic(
+  () =>
+    import("@/components/AgentPlaceholder").then((mod) => ({
+      default: mod.AgentPlaceholder,
+    })),
+  { loading: PanelFallback }
+);
+const SettingsPanel = dynamic(
+  () =>
+    import("@/components/SettingsPanel").then((mod) => ({
+      default: mod.SettingsPanel,
+    })),
+  { loading: PanelFallback }
+);
+
+const SIDEBAR_BRAND = (
+  <div className="flex items-center gap-2 px-2 py-3 group-data-[collapsible=icon]:justify-center">
+    <div className="flex size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+      <TruckIcon className="size-4" />
+    </div>
+    <div className="min-w-0 group-data-[collapsible=icon]:hidden">
+      <p className="truncate text-sm font-semibold">Freight Desk</p>
+      <p className="truncate text-xs text-sidebar-foreground/70">POC</p>
+    </div>
+  </div>
+);
+
+function preloadPanel(section: VisitSection) {
+  if (typeof window === "undefined") return;
+  void PANEL_IMPORTS[section]();
+}
+
+function SectionPanel({
+  id,
   children,
 }: {
-  active: boolean;
+  id: VisitSection;
   children: ReactNode;
 }) {
+  const active = useVisitStore((s) => s.section === id);
+  const visited = useVisitStore((s) => s.visitedSections.includes(id));
+  if (!visited) return null;
+
   return (
     <div
       className={
@@ -61,28 +121,27 @@ function KeepAlivePanel({
           : "hidden"
       }
       aria-hidden={!active}
-      inert={!active}
     >
-      {children}
+      <Activity mode={active ? "visible" : "hidden"}>{children}</Activity>
     </div>
   );
 }
 
 function MainWindow() {
-  const section = useVisitStore((s) => s.section);
-
   return (
     <>
-      <KeepAlivePanel active={section === "assembler"}>
+      <SectionPanel id="assembler">
         <AssemblerPanel />
-      </KeepAlivePanel>
-      <KeepAlivePanel active={section === "clarification"}>
+      </SectionPanel>
+      <SectionPanel id="clarification">
         <ClarificationPanel />
-      </KeepAlivePanel>
-      {section === "booking" ? (
+      </SectionPanel>
+      <SectionPanel id="booking">
         <AgentPlaceholder agentName="Booking Agent" />
-      ) : null}
-      {section === "settings" ? <SettingsPanel /> : null}
+      </SectionPanel>
+      <SectionPanel id="settings">
+        <SettingsPanel />
+      </SectionPanel>
     </>
   );
 }
@@ -95,15 +154,7 @@ export function FreightDeskShell() {
     <SidebarProvider>
       <Sidebar collapsible="icon">
         <SidebarHeader className="border-b border-sidebar-border">
-          <div className="flex items-center gap-2 px-2 py-3 group-data-[collapsible=icon]:justify-center">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-              <TruckIcon className="size-4" />
-            </div>
-            <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-              <p className="truncate text-sm font-semibold">Freight Desk</p>
-              <p className="truncate text-xs text-sidebar-foreground/70">POC</p>
-            </div>
-          </div>
+          {SIDEBAR_BRAND}
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
@@ -114,7 +165,9 @@ export function FreightDeskShell() {
                   <SidebarMenuItem key={id}>
                     <SidebarMenuButton
                       isActive={section === id}
-                      onPress={() => setSection(id)}
+                      onPress={() => startTransition(() => setSection(id))}
+                      onHoverStart={() => preloadPanel(id)}
+                      onFocus={() => preloadPanel(id)}
                       tooltip={label}
                     >
                       <Icon />
@@ -133,7 +186,7 @@ export function FreightDeskShell() {
           <SidebarTrigger />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <span className="text-sm text-muted-foreground">
-            {NAV.find((n) => n.section === section)?.label}
+            {NAV_BY_SECTION.get(section)?.label}
           </span>
         </header>
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">

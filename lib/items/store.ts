@@ -48,7 +48,7 @@ async function writeItemsFile(items: AssemblerItem[]): Promise<void> {
 }
 
 function newestFirst(items: AssemblerItem[]): AssemblerItem[] {
-  return [...items].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return items.toSorted((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 export function titleFromMessage(message: string): string {

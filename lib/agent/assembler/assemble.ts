@@ -2,12 +2,12 @@ import {
   ASSEMBLER_PROMPT,
   fillAssemblerPrompt,
 } from "@/lib/agent/assembler/prompt";
-import { invokeCursorAssembler } from "@/lib/agent/cursorClient";
-import { invokeGeminiAssembler, logGeminiError } from "@/lib/agent/geminiClient";
 import { applyAssemblerGuardrail } from "@/lib/agent/guardrail";
-import { invokeOpenAiAssembler, logOpenAiError } from "@/lib/agent/openaiClient";
+import {
+  invokeAssemblerModel,
+  logAssemblerInvokeError,
+} from "@/lib/agent/invoke";
 import type { LlmProvider } from "@/lib/agent/provider";
-import type { AssemblerModelOutput } from "@/lib/agent/schema";
 import { sampleCustomersJson } from "@/lib/data/customers";
 import {
   createEmptyShipmentForm,
@@ -33,20 +33,13 @@ async function callAssemblerModel(
   provider: LlmProvider,
   apiKey: string,
   message: string
-): Promise<AssemblerModelOutput> {
-  const instructions = fillAssemblerPrompt(
-    ASSEMBLER_PROMPT,
+) {
+  return invokeAssemblerModel(
+    provider,
+    apiKey,
     message,
-    sampleCustomersJson()
+    fillAssemblerPrompt(ASSEMBLER_PROMPT, message, sampleCustomersJson())
   );
-
-  if (provider === "cursor") {
-    return invokeCursorAssembler(apiKey, instructions);
-  }
-  if (provider === "openai") {
-    return invokeOpenAiAssembler(apiKey, message, instructions);
-  }
-  return invokeGeminiAssembler(apiKey, message, instructions);
 }
 
 export async function runAssemblerSend(args: {
@@ -88,13 +81,7 @@ export async function runAssemblerSend(args: {
       formStatus: formCheck.formStatus,
     });
   } catch (error) {
-    if (args.provider === "openai") {
-      logOpenAiError(error, process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini");
-    } else if (args.provider === "cursor") {
-      console.error("Assembler Cursor call failed", error);
-    } else {
-      logGeminiError(error, process.env.GEMINI_MODEL?.trim() || "gemini-3.8-flash");
-    }
+    await logAssemblerInvokeError(args.provider, error);
     return saveItem(amberItem(item, UNREADABLE_REASON));
   }
 }

@@ -25,6 +25,8 @@ export type SampleCustomer = {
 
 export const SAMPLE_CUSTOMERS = customersJson as SampleCustomer[];
 
+const SAMPLE_CUSTOMERS_JSON = JSON.stringify(SAMPLE_CUSTOMERS, null, 2);
+
 export function sampleCustomersJson(): string {
-  return JSON.stringify(SAMPLE_CUSTOMERS, null, 2);
+  return SAMPLE_CUSTOMERS_JSON;
 }

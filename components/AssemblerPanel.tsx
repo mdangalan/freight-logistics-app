@@ -1,20 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { AgentDetailPlaceholder } from "@/components/agent/AgentDetailPlaceholder";
-import { AgentPanelChrome } from "@/components/agent/AgentPanelChrome";
-import { AgentThreadList } from "@/components/agent/AgentThreadList";
 import { AgentMessageComposer } from "@/components/agent/AgentMessageComposer";
+import { AgentPanelChrome } from "@/components/agent/AgentPanelChrome";
+import { AgentSendAlerts } from "@/components/agent/AgentSendAlerts";
+import { AgentThreadList } from "@/components/agent/AgentThreadList";
 import { ConversationTimeline } from "@/components/agent/ConversationTimeline";
 import { HumanReviewHeader } from "@/components/agent/HumanReviewHeader";
+import { PendingSendTimeline } from "@/components/agent/PendingSendTimeline";
 import { ShipmentForm } from "@/components/ShipmentForm";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { AssemblerItem, ClarificationMessage } from "@/lib/form/catalog";
 import { useVisitStore } from "@/lib/visit-store";
-import { AlertCircleIcon } from "lucide-react";
 
 function assemblerConversationMessages(
   item: AssemblerItem
@@ -38,13 +38,24 @@ function assemblerConversationMessages(
   return messages;
 }
 
+function assemblerListItems(items: AssemblerItem[]) {
+  return items.map((item) => ({
+    id: item.id,
+    title: item.title,
+    subtitle:
+      item.needsHuman && item.humanReason ? item.humanReason : undefined,
+    needsHuman: item.needsHuman,
+    createdAt: item.createdAt,
+  }));
+}
+
 function AssemblerItemDetail({ item }: { item: AssemblerItem }) {
   const upsertItem = useVisitStore((s) => s.upsertItem);
-  const [clearing, setClearing] = useState(false);
+  const clearingRef = useRef(false);
 
   async function handleClearHumanFlag() {
-    if (clearing) return;
-    setClearing(true);
+    if (clearingRef.current) return;
+    clearingRef.current = true;
     try {
       const response = await fetch(`/api/assembler/${item.id}`, {
         method: "PATCH",
@@ -55,7 +66,7 @@ function AssemblerItemDetail({ item }: { item: AssemblerItem }) {
       const payload = (await response.json()) as { item?: AssemblerItem };
       if (payload.item) upsertItem(payload.item);
     } finally {
-      setClearing(false);
+      clearingRef.current = false;
     }
   }
 
@@ -93,16 +104,16 @@ export function AssemblerPanel() {
   const [sendError, setSendError] = useState("");
   const [sendNotice, setSendNotice] = useState("");
 
-  const apiKey = useVisitStore((s) => s.apiKey);
-  const llmProvider = useVisitStore((s) => s.llmProvider);
   const items = useVisitStore((s) => s.items);
   const selectedItemId = useVisitStore((s) => s.selectedItemId);
   const setSelectedItemId = useVisitStore((s) => s.setSelectedItemId);
   const setItems = useVisitStore((s) => s.setItems);
   const upsertItem = useVisitStore((s) => s.upsertItem);
+  const sendingRef = useRef(false);
 
   const selectedItem =
     items.find((item) => item.id === selectedItemId) ?? null;
+  const listItems = assemblerListItems(items);
 
   useEffect(() => {
     let cancelled = false;
@@ -129,14 +140,16 @@ export function AssemblerPanel() {
   }, [setItems, setSelectedItemId]);
 
   async function handleSend() {
+    const { apiKey, llmProvider } = useVisitStore.getState();
     if (!apiKey.trim()) {
       setMissingKeyAlert(true);
       setSendError("");
       return;
     }
     const message = draft.trim();
-    if (!message || isSending) return;
+    if (!message || sendingRef.current) return;
 
+    sendingRef.current = true;
     setMissingKeyAlert(false);
     setSendError("");
     setSendNotice("");
@@ -174,6 +187,7 @@ export function AssemblerPanel() {
     } catch {
       setSendError("The assistant could not answer. Try again.");
     } finally {
+      sendingRef.current = false;
       setIsSending(false);
       setPendingSend(null);
     }
@@ -188,22 +202,7 @@ export function AssemblerPanel() {
         showMissingKeyAlert={missingKeyAlert}
         isSending={isSending}
       />
-      {sendError ? (
-        <Alert variant="destructive">
-          <AlertCircleIcon />
-          <AlertTitle>Send failed</AlertTitle>
-          <AlertDescription>{sendError}</AlertDescription>
-        </Alert>
-      ) : null}
-      {sendNotice ? (
-        <Alert className="border-amber-500/30 bg-amber-500/5">
-          <AlertCircleIcon className="text-amber-600" />
-          <AlertTitle className="text-amber-950 dark:text-amber-50">
-            No assistant reply
-          </AlertTitle>
-          <AlertDescription>{sendNotice}</AlertDescription>
-        </Alert>
-      ) : null}
+      <AgentSendAlerts error={sendError} notice={sendNotice} />
     </>
   );
 
@@ -211,16 +210,7 @@ export function AssemblerPanel() {
     <AgentPanelChrome title="Assembler Agent" preview={false} topBar={topBar}>
       <AgentThreadList
         listLabel="Items"
-        items={items.map((item) => ({
-          id: item.id,
-          title: item.title,
-          subtitle:
-            item.needsHuman && item.humanReason
-              ? item.humanReason
-              : undefined,
-          needsHuman: item.needsHuman,
-          createdAt: item.createdAt,
-        }))}
+        items={listItems}
         selectedId={selectedItemId}
         onSelect={setSelectedItemId}
         emptyMessage="No items yet. Type a customer message and send it."
@@ -228,22 +218,11 @@ export function AssemblerPanel() {
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {pendingSend ? (
-          <Card className="border-border/80 shadow-sm">
-            <CardContent>
-              <ConversationTimeline
-                messages={[
-                  {
-                    id: "pending-customer",
-                    role: "customer",
-                    content: pendingSend.content,
-                    sentAt: pendingSend.sentAt,
-                  },
-                ]}
-                agentLabel="Assembler agent"
-                awaitingReply
-              />
-            </CardContent>
-          </Card>
+          <PendingSendTimeline
+            content={pendingSend.content}
+            sentAt={pendingSend.sentAt}
+            agentLabel="Assembler agent"
+          />
         ) : selectedItem ? (
           <AssemblerItemDetail item={selectedItem} />
         ) : (

@@ -26,7 +26,7 @@ export function AgentThreadList({
   emptyMessage,
   listLabel = "Threads",
 }: AgentThreadListProps) {
-  const sorted = [...items].sort(
+  const sorted = items.toSorted(
     (a, b) =>
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
