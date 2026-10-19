@@ -1,0 +1,465 @@
+{
+  "version": 1,
+  "purpose": "Paste-ready customer messages to exercise Assembler (one-shot) and Clarification (multi-turn) against the seven-field form, history-strip rule, and guardrails.",
+  "referenceCustomers": [
+    "Northwind Packaging — Maya Chen — two confirmed bookings (Shah Alam plant; Penang and KL drops)",
+    "Harbour & Co — James Ong — one cancelled booking (Johor Bahru → KLIA cargo village)",
+    "New Pier Studio — Aisha Rahman — no bookings"
+  ],
+  "assembler": [
+    {
+      "id": "A1",
+      "title": "Form complete — New Pier Studio",
+      "tests": "Happy path. All seven facts are in the email, including an explicit total weight. New Pier has no history, so nothing can leak from a past booking.",
+      "expect": {
+        "needsHuman": false,
+        "formStatus": "complete",
+        "fields": {
+          "customerName": "filled",
+          "pickupAddress": "filled",
+          "pickupDate": "filled",
+          "deliveryAddress": "filled",
+          "goodsDescription": "filled",
+          "palletCount": "filled",
+          "totalWeightKg": "filled"
+        },
+        "reply": "Restates the seven values and asks the customer to confirm them."
+      },
+      "message": "Hi Freight Desk,\n\nThis is Aisha Rahman at New Pier Studio. Please arrange a domestic road collection of 2 pallets of framed prints from 14 Jalan Maharajalela, Kuala Lumpur on 22 October 2026, delivering to 88 Industrial Loop, Johor Bahru. Total weight is 180 kg for the whole shipment.\n\nThanks,\nAisha"
+    },
+    {
+      "id": "A2",
+      "title": "Incomplete — missing weight",
+      "tests": "Green item with an incomplete form. Missing weight is a question, not a human-review flag.",
+      "expect": {
+        "needsHuman": false,
+        "formStatus": "incomplete",
+        "fields": {
+          "customerName": "filled",
+          "pickupAddress": "filled",
+          "pickupDate": "filled",
+          "deliveryAddress": "filled",
+          "goodsDescription": "filled",
+          "palletCount": "filled",
+          "totalWeightKg": "missing"
+        },
+        "reply": "Asks only for the total weight in kilograms for the whole shipment."
+      },
+      "message": "James at Harbour & Co here. Can you move 2 pallets of exhibition display kits from 88 Industrial Loop, Johor Bahru to KLIA cargo village, Sepang, Selangor on 21 October 2026? I don't have the weight yet."
+    },
+    {
+      "id": "A3",
+      "title": "Unclear weight — 4 pallets, unqualified kg",
+      "tests": "Weight rule: more than one pallet plus '450 kg' without 'total' / 'for the shipment' stays unclear. Item stays green.",
+      "expect": {
+        "needsHuman": false,
+        "formStatus": "incomplete",
+        "fields": {
+          "customerName": "filled",
+          "pickupAddress": "filled",
+          "pickupDate": "filled",
+          "deliveryAddress": "filled",
+          "goodsDescription": "filled",
+          "palletCount": "filled",
+          "totalWeightKg": "unclear"
+        },
+        "reply": "Asks whether 450 kg is the whole shipment or per pallet. Note on the weight row: 'Could be per pallet or the whole shipment.'"
+      },
+      "message": "Hi, Maya Chen at Northwind Packaging. Need 4 pallets of printed packaging sleeves collected from Lot 22, Jalan Industri 3, Shah Alam, Selangor on 27 October 2026, delivered to 12 Dock Street, George Town, Penang. Weight is 450 kg."
+    },
+    {
+      "id": "A4",
+      "title": "Unclear date — next Tuesday",
+      "tests": "Relative dates are not calendar days. 'Next Tuesday' must stay unclear; the model must not invent 2026-10-27.",
+      "expect": {
+        "needsHuman": false,
+        "formStatus": "incomplete",
+        "fields": {
+          "customerName": "filled",
+          "pickupAddress": "filled",
+          "pickupDate": "unclear",
+          "deliveryAddress": "filled",
+          "goodsDescription": "filled",
+          "palletCount": "filled",
+          "totalWeightKg": "filled"
+        },
+        "reply": "Asks for a calendar day (day + month, or YYYY-MM-DD)."
+      },
+      "message": "Hi Freight Desk — Aisha at New Pier Studio. We need a road collection of 3 pallets of framed prints from 14 Jalan Maharajalela, Kuala Lumpur, going to 88 Industrial Loop, Johor Bahru. Pickup next Tuesday if you can. Total weight 180 kg for the shipment."
+    },
+    {
+      "id": "A5",
+      "title": "City-only addresses",
+      "tests": "A city name alone is not a collect/deliver site. Short city names (Penang, Ipoh) fail the server's 8-character address rule even if the model marks them filled.",
+      "expect": {
+        "needsHuman": false,
+        "formStatus": "incomplete",
+        "fields": {
+          "customerName": "filled",
+          "pickupAddress": "unclear",
+          "pickupDate": "filled",
+          "deliveryAddress": "unclear",
+          "goodsDescription": "filled",
+          "palletCount": "filled",
+          "totalWeightKg": "filled"
+        },
+        "reply": "Asks for street or site plus city for both pickup and delivery."
+      },
+      "message": "Please collect 2 pallets of framed prints from Penang and deliver to Ipoh. Customer is New Pier Studio, Aisha Rahman. Pickup 22 October 2026. Total weight 180 kg for the whole shipment."
+    },
+    {
+      "id": "A6",
+      "title": "Pallet range is unclear",
+      "tests": "Pallet count must be a whole number in digits. '4–6 pallets' stays unclear even when every other field is solid.",
+      "expect": {
+        "needsHuman": false,
+        "formStatus": "incomplete",
+        "fields": {
+          "customerName": "filled",
+          "pickupAddress": "filled",
+          "pickupDate": "filled",
+          "deliveryAddress": "filled",
+          "goodsDescription": "filled",
+          "palletCount": "unclear",
+          "totalWeightKg": "filled"
+        },
+        "reply": "Asks for an exact pallet count as a number."
+      },
+      "message": "This is Maya Chen from Northwind Packaging. Road collection from Lot 22, Jalan Industri 3, Shah Alam, Selangor on 27 October 2026, deliver to 18 Weld Quay, George Town, Penang. About 4–6 pallets of printed packaging sleeves, 450 kg in total for the whole shipment."
+    },
+    {
+      "id": "A7",
+      "title": "History trap — same as last time",
+      "tests": "Sample bookings are reference only. 'Same drop as last time' must not copy 18 Weld Quay or Lot 22 from Northwind history unless this email states those facts.",
+      "expect": {
+        "needsHuman": false,
+        "formStatus": "incomplete",
+        "fields": {
+          "customerName": "filled",
+          "pickupAddress": "unclear",
+          "pickupDate": "unclear",
+          "deliveryAddress": "unclear",
+          "goodsDescription": "filled",
+          "palletCount": "filled",
+          "totalWeightKg": "unclear"
+        },
+        "mustNotFillFromHistory": [
+          "Lot 22, Jalan Industri 3, Shah Alam, Selangor",
+          "18 Weld Quay, George Town, Penang",
+          "2100",
+          "6"
+        ],
+        "reply": "Asks for the Shah Alam street/site, a calendar pickup day, the Penang street address, and whether 450 kg is the total."
+      },
+      "message": "Hi Freight Desk,\n\nThis is Maya Chen from Northwind Packaging. Can you arrange a road collection from our Shah Alam plant next Tuesday? We have about 4 pallets of printed packaging sleeves going to Penang — same drop as last time is fine. Weight is around 450 kg.\n\nThanks,\nMaya"
+    },
+    {
+      "id": "A8",
+      "title": "One pallet — unqualified weight may fill",
+      "tests": "Weight rule special case: with exactly 1 pallet, per-pallet and total are the same figure, so '320 kg' can stay filled without the word 'total'.",
+      "expect": {
+        "needsHuman": false,
+        "formStatus": "complete",
+        "fields": {
+          "customerName": "filled",
+          "pickupAddress": "filled",
+          "pickupDate": "filled",
+          "deliveryAddress": "filled",
+          "goodsDescription": "filled",
+          "palletCount": "filled",
+          "totalWeightKg": "filled"
+        }
+      },
+      "message": "Harbour & Co, James Ong. One pallet of exhibition display kits from 88 Industrial Loop, Johor Bahru to 7 Jalan Chan Sow Lin, Kuala Lumpur on 23 October 2026. Weight 320 kg."
+    },
+    {
+      "id": "A9",
+      "title": "Guardrail — lithium / hazardous",
+      "tests": "Out of scope cargo. First matching rule is hazardous (lithium). Form stays all missing; reply is not posted.",
+      "expect": {
+        "needsHuman": true,
+        "humanReason": "Customer asked about hazardous cargo",
+        "formStatus": "incomplete",
+        "reply": ""
+      },
+      "message": "Need 6 pallets of lithium batteries moved from Port Klang to Penang on 24 October 2026. Total weight 900 kg for the shipment."
+    },
+    {
+      "id": "A10",
+      "title": "Guardrail — air freight",
+      "tests": "Mode other than domestic road.",
+      "expect": {
+        "needsHuman": true,
+        "humanReason": "Customer asked for air or sea freight",
+        "reply": ""
+      },
+      "message": "Aisha at New Pier Studio — please send 2 pallets of framed prints by air freight from 14 Jalan Maharajalela, Kuala Lumpur to Penang on 22 October 2026. Total weight 180 kg for the shipment."
+    },
+    {
+      "id": "A11",
+      "title": "Guardrail — guaranteed delivery",
+      "tests": "Authority limit. Amber even if the rest of the shipment looks ordinary.",
+      "expect": {
+        "needsHuman": true,
+        "humanReason": "Customer asked for a guaranteed delivery date",
+        "reply": ""
+      },
+      "message": "James at Harbour & Co. 2 pallets of exhibition display kits from 88 Industrial Loop, Johor Bahru to KLIA cargo village on 21 October 2026, 320 kg total for the shipment. We need a guaranteed delivery time — can you commit?"
+    },
+    {
+      "id": "A12",
+      "title": "Guardrail — compensation",
+      "tests": "Non-shipping / claims topic.",
+      "expect": {
+        "needsHuman": true,
+        "humanReason": "Customer asked about compensation",
+        "reply": ""
+      },
+      "message": "Last shipment arrived damaged. We want compensation before we send anything else. Also book 2 pallets from Johor Bahru to KL next week."
+    },
+    {
+      "id": "A13",
+      "title": "Guardrail — contract",
+      "tests": "Contract / rates request is out of scope for this desk.",
+      "expect": {
+        "needsHuman": true,
+        "humanReason": "Customer asked about a contract",
+        "reply": ""
+      },
+      "message": "Can we sign a contract for monthly road collections from Shah Alam? Start with 4 pallets of packaging sleeves to Penang."
+    },
+    {
+      "id": "A14",
+      "title": "Guardrail — skip the rules",
+      "tests": "Bypass language. 'just book it' trips the skip-the-rules rule.",
+      "expect": {
+        "needsHuman": true,
+        "humanReason": "Customer asked to skip the rules",
+        "reply": ""
+      },
+      "message": "Northwind Packaging here. Same as usual, just book it — skip the rules this once. 4 pallets from Shah Alam to Penang on 27 October 2026."
+    }
+  ],
+  "clarification": [
+    {
+      "id": "C1",
+      "title": "Full thread — gaps then complete",
+      "tests": "Opening is the history trap. Follow-up supplies street, calendar date, Penang address, exact pallets, and an explicit total. Ends with a confirmation-style email. Filled fields must not be re-asked.",
+      "turns": [
+        {
+          "id": "C1-1",
+          "from": "customer",
+          "where": "Clarification composer (new thread)",
+          "expect": {
+            "needsHuman": false,
+            "formStatus": "incomplete",
+            "asksAbout": [
+              "Shah Alam street or site",
+              "calendar pickup date",
+              "Penang street address",
+              "whether 450 kg is the total"
+            ],
+            "mustNotFillFromHistory": [
+              "Lot 22, Jalan Industri 3, Shah Alam, Selangor",
+              "18 Weld Quay, George Town, Penang"
+            ]
+          },
+          "message": "Hi Freight Desk,\n\nThis is Maya Chen from Northwind Packaging. Can you arrange a road collection from our Shah Alam plant next Tuesday? We have about 4 pallets of printed packaging sleeves going to Penang — same drop as last time is fine. Weight is around 450 kg.\n\nThanks,\nMaya"
+        },
+        {
+          "id": "C1-2",
+          "from": "customer",
+          "where": "Reply on the same thread",
+          "expect": {
+            "needsHuman": false,
+            "formStatus": "complete",
+            "fields": {
+              "customerName": "filled",
+              "pickupAddress": "filled",
+              "pickupDate": "filled",
+              "deliveryAddress": "filled",
+              "goodsDescription": "filled",
+              "palletCount": "filled",
+              "totalWeightKg": "filled"
+            },
+            "reply": "Restates all seven values and asks Maya to confirm them. Does not ask the same gaps again."
+          },
+          "message": "Pickup is Tuesday 27 October 2026 from Lot 22, Jalan Industri 3, Shah Alam, Selangor. Deliver to 18 Weld Quay, George Town, Penang. It's 4 pallets, 450 kg in total for the whole shipment."
+        }
+      ]
+    },
+    {
+      "id": "C2",
+      "title": "Weight-only follow-up",
+      "tests": "Start with an otherwise complete shipment whose weight is unqualified. One reply with 'in total for the whole shipment' should complete the form. The agent must not re-ask filled addresses or dates.",
+      "turns": [
+        {
+          "id": "C2-1",
+          "from": "customer",
+          "where": "Clarification composer (new thread)",
+          "expect": {
+            "needsHuman": false,
+            "formStatus": "incomplete",
+            "fields": {
+              "totalWeightKg": "unclear"
+            },
+            "reply": "Asks only whether 450 kg is the total or per pallet."
+          },
+          "message": "Hi, Maya Chen at Northwind Packaging. Need 4 pallets of printed packaging sleeves collected from Lot 22, Jalan Industri 3, Shah Alam, Selangor on 27 October 2026, delivered to 12 Dock Street, George Town, Penang. Weight is 450 kg."
+        },
+        {
+          "id": "C2-2",
+          "from": "customer",
+          "where": "Reply on the same thread",
+          "expect": {
+            "needsHuman": false,
+            "formStatus": "complete",
+            "fields": {
+              "totalWeightKg": "filled"
+            }
+          },
+          "message": "450 kg is the total for the whole shipment, not per pallet."
+        }
+      ]
+    },
+    {
+      "id": "C3",
+      "title": "Conflict — pallet count changes",
+      "tests": "A later message that contradicts a filled value must not silently pick a winner. Pallet count becomes unclear with a conflict note; the next reply resolves it.",
+      "turns": [
+        {
+          "id": "C3-1",
+          "from": "customer",
+          "where": "Clarification composer (new thread)",
+          "expect": {
+            "needsHuman": false,
+            "formStatus": "complete",
+            "fields": {
+              "palletCount": "filled"
+            },
+            "reply": "Confirmation email restating 2 pallets and the other six values."
+          },
+          "message": "James Ong, Harbour & Co. Please collect 2 pallets of exhibition display kits from 88 Industrial Loop, Johor Bahru on 21 October 2026. Deliver to KLIA cargo village, Sepang, Selangor. Total weight 320 kg for the shipment."
+        },
+        {
+          "id": "C3-2",
+          "from": "customer",
+          "where": "Reply on the same thread",
+          "expect": {
+            "needsHuman": false,
+            "formStatus": "incomplete",
+            "fields": {
+              "palletCount": "unclear"
+            },
+            "reply": "Asks whether the load is 2 pallets or 3. Other fields stay filled."
+          },
+          "message": "Sorry — it's 3 pallets, not 2. Same everything else."
+        },
+        {
+          "id": "C3-3",
+          "from": "customer",
+          "where": "Reply on the same thread",
+          "expect": {
+            "needsHuman": false,
+            "formStatus": "complete",
+            "fields": {
+              "palletCount": "filled"
+            },
+            "reply": "Confirmation email now restating 3 pallets."
+          },
+          "message": "Confirmed: 3 pallets, not 2."
+        }
+      ]
+    },
+    {
+      "id": "C4",
+      "title": "Partial reply keeps earlier facts",
+      "tests": "Customer answers only the missing date. Previously filled fields must stay filled; the agent must not wipe them or re-ask them.",
+      "turns": [
+        {
+          "id": "C4-1",
+          "from": "customer",
+          "where": "Clarification composer (new thread)",
+          "expect": {
+            "needsHuman": false,
+            "formStatus": "incomplete",
+            "fields": {
+              "pickupDate": "unclear",
+              "customerName": "filled",
+              "pickupAddress": "filled",
+              "deliveryAddress": "filled"
+            }
+          },
+          "message": "Hi Freight Desk — Aisha at New Pier Studio. We need a road collection of 3 pallets of framed prints from 14 Jalan Maharajalela, Kuala Lumpur, going to 88 Industrial Loop, Johor Bahru. Pickup next Tuesday if you can. Total weight 180 kg for the shipment."
+        },
+        {
+          "id": "C4-2",
+          "from": "customer",
+          "where": "Reply on the same thread",
+          "expect": {
+            "needsHuman": false,
+            "formStatus": "complete",
+            "fields": {
+              "pickupDate": "filled",
+              "pickupAddress": "filled",
+              "deliveryAddress": "filled",
+              "palletCount": "filled",
+              "totalWeightKg": "filled"
+            }
+          },
+          "message": "Pickup can be 27 October 2026."
+        }
+      ]
+    },
+    {
+      "id": "C5",
+      "title": "Guardrail mid-thread — keep the form",
+      "tests": "A later reply that asks for a guaranteed arrival turns the thread amber and must not post an assistant reply. Unlike a failed first send, a failed follow-up must not wipe fields already gathered.",
+      "turns": [
+        {
+          "id": "C5-1",
+          "from": "customer",
+          "where": "Clarification composer (new thread)",
+          "expect": {
+            "needsHuman": false,
+            "formStatus": "incomplete",
+            "fields": {
+              "totalWeightKg": "missing"
+            }
+          },
+          "message": "James at Harbour & Co here. Can you move 2 pallets of exhibition display kits from 88 Industrial Loop, Johor Bahru to KLIA cargo village, Sepang, Selangor on 21 October 2026? I don't have the weight yet."
+        },
+        {
+          "id": "C5-2",
+          "from": "customer",
+          "where": "Reply on the same thread",
+          "expect": {
+            "needsHuman": true,
+            "humanReason": "Customer asked for a guaranteed delivery date",
+            "reply": "",
+            "formKept": true
+          },
+          "message": "Weight is 320 kg total for the shipment. We also need a guaranteed delivery time — can you commit?"
+        }
+      ]
+    },
+    {
+      "id": "C6",
+      "title": "Guardrail on first Clarification send — sea freight",
+      "tests": "Same guardrail as Assembler, from the Clarification composer. Form stays empty; no assistant message is added.",
+      "turns": [
+        {
+          "id": "C6-1",
+          "from": "customer",
+          "where": "Clarification composer (new thread)",
+          "expect": {
+            "needsHuman": true,
+            "humanReason": "Customer asked for air or sea freight",
+            "reply": ""
+          },
+          "message": "Please send 4 pallets of printed packaging sleeves by sea freight from Shah Alam to Penang, pickup 27 October 2026. Customer Northwind Packaging."
+        }
+      ]
+    }
+  ]
+}

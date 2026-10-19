@@ -1,12 +1,10 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
-
 import {
   createEmptyShipmentForm,
   type AssemblerItem,
 } from "@/lib/form/catalog";
+import { readRuntimeJson, writeRuntimeJson } from "@/lib/data/runtime-files";
 
-const ITEMS_PATH = path.join(process.cwd(), "data", "items.json");
+const ITEMS_FILE = "items.json";
 
 let writeChain: Promise<void> = Promise.resolve();
 
@@ -30,12 +28,15 @@ function isAssemblerItem(value: unknown): value is AssemblerItem {
   );
 }
 
+function parseItems(raw: string): AssemblerItem[] {
+  const parsed: unknown = JSON.parse(raw);
+  if (!Array.isArray(parsed)) return [];
+  return parsed.filter(isAssemblerItem);
+}
+
 async function readItemsFile(): Promise<AssemblerItem[]> {
   try {
-    const raw = await fs.readFile(ITEMS_PATH, "utf8");
-    const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter(isAssemblerItem);
+    return parseItems(await readRuntimeJson(ITEMS_FILE));
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
     throw error;
@@ -43,8 +44,7 @@ async function readItemsFile(): Promise<AssemblerItem[]> {
 }
 
 async function writeItemsFile(items: AssemblerItem[]): Promise<void> {
-  await fs.mkdir(path.dirname(ITEMS_PATH), { recursive: true });
-  await fs.writeFile(ITEMS_PATH, `${JSON.stringify(items, null, 2)}\n`, "utf8");
+  await writeRuntimeJson(ITEMS_FILE, `${JSON.stringify(items, null, 2)}\n`);
 }
 
 function newestFirst(items: AssemblerItem[]): AssemblerItem[] {

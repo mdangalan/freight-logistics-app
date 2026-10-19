@@ -1,5 +1,52 @@
 [
   {
+    "id": "a344c001-622d-4899-8395-4a1b23034bba",
+    "title": "Hi Freight Desk,",
+    "needsHuman": false,
+    "humanReason": "",
+    "message": "Hi Freight Desk,\n\nThis is Aisha Rahman at New Pier Studio. Please arrange a domestic road collection of 2 pallets of framed prints from 14 Jalan Maharajalela, Kuala Lumpur on 22 October 2026, delivering to 88 Industrial Loop, Johor Bahru. Total weight is 180 kg for the whole shipment.\n\nThanks,\nAisha",
+    "reply": "Thank you, Aisha. Please confirm the details for your shipment: Customer Name: Aisha Rahman (New Pier Studio); Pickup Address: 14 Jalan Maharajalela, Kuala Lumpur; Pickup Date: 2026-10-22; Delivery Address: 88 Industrial Loop, Johor Bahru; Goods Description: framed prints; Pallet Count: 2; Total Weight: 180 kg.",
+    "form": {
+      "customerName": {
+        "status": "filled",
+        "value": "Aisha Rahman (New Pier Studio)",
+        "note": ""
+      },
+      "pickupAddress": {
+        "status": "filled",
+        "value": "14 Jalan Maharajalela, Kuala Lumpur",
+        "note": ""
+      },
+      "pickupDate": {
+        "status": "filled",
+        "value": "2026-10-22",
+        "note": ""
+      },
+      "deliveryAddress": {
+        "status": "filled",
+        "value": "88 Industrial Loop, Johor Bahru",
+        "note": ""
+      },
+      "goodsDescription": {
+        "status": "filled",
+        "value": "framed prints",
+        "note": ""
+      },
+      "palletCount": {
+        "status": "filled",
+        "value": "2",
+        "note": ""
+      },
+      "totalWeightKg": {
+        "status": "filled",
+        "value": "180",
+        "note": ""
+      }
+    },
+    "formStatus": "complete",
+    "createdAt": "2026-10-19T03:17:21.957Z"
+  },
+  {
     "id": "item-newpier-incomplete",
     "title": "Hi Freight Desk — Aisha at New Pier Studio…",
     "needsHuman": false,

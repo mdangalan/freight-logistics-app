@@ -1,6 +1,11 @@
 import { promises as fs } from "node:fs";
-import path from "node:path";
 
+import {
+  bundledDataFile,
+  isVercelRuntime,
+  readRuntimeJson,
+  writeRuntimeJson,
+} from "@/lib/data/runtime-files";
 import {
   createEmptyShipmentForm,
   type ClarificationMessage,
@@ -8,16 +13,8 @@ import {
   type InquiryStatus,
 } from "@/lib/form/catalog";
 
-const THREADS_PATH = path.join(
-  process.cwd(),
-  "data",
-  "clarification-threads.json"
-);
-const SEED_PATH = path.join(
-  process.cwd(),
-  "data",
-  "mock-clarification-threads.json"
-);
+const THREADS_FILE = "clarification-threads.json";
+const SEED_FILE = "mock-clarification-threads.json";
 
 let writeChain: Promise<void> = Promise.resolve();
 
@@ -66,19 +63,20 @@ function titleFromMessage(message: string): string {
   return `${collapsed.slice(0, 71)}…`;
 }
 
-async function readJsonThreads(filePath: string): Promise<ClarificationThread[]> {
-  const raw = await fs.readFile(filePath, "utf8");
+function parseThreads(raw: string): ClarificationThread[] {
   const parsed: unknown = JSON.parse(raw);
   if (!Array.isArray(parsed)) return [];
   return parsed.filter(isThread);
 }
 
+async function readJsonThreads(filePath: string): Promise<ClarificationThread[]> {
+  return parseThreads(await fs.readFile(filePath, "utf8"));
+}
+
 async function writeThreadsFile(threads: ClarificationThread[]): Promise<void> {
-  await fs.mkdir(path.dirname(THREADS_PATH), { recursive: true });
-  await fs.writeFile(
-    THREADS_PATH,
-    `${JSON.stringify(threads, null, 2)}\n`,
-    "utf8"
+  await writeRuntimeJson(
+    THREADS_FILE,
+    `${JSON.stringify(threads, null, 2)}\n`
   );
 }
 
@@ -88,14 +86,17 @@ function newestFirst(threads: ClarificationThread[]): ClarificationThread[] {
 
 async function readThreadsFile(): Promise<ClarificationThread[]> {
   try {
-    return await readJsonThreads(THREADS_PATH);
+    return parseThreads(await readRuntimeJson(THREADS_FILE));
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
   }
 
   try {
-    const seeded = await readJsonThreads(SEED_PATH);
-    await writeThreadsFile(seeded);
+    const seeded = await readJsonThreads(bundledDataFile(SEED_FILE));
+    // Local dev materializes the seed into data/. On Vercel that write would
+    // hit the read-only deployment filesystem, so the seed stays read-only
+    // until a real send copies the list into temp storage.
+    if (!isVercelRuntime()) await writeThreadsFile(seeded);
     return seeded;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
