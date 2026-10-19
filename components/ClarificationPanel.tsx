@@ -331,6 +331,17 @@ export function ClarificationPanel() {
 
   const topBar = (
     <>
+      <p className="text-sm text-muted-foreground">
+        Clarification clarifies — it does not replace Assembler for complete
+        intake. Use this agent when the order still has missing, unclear, or
+        conflicting shipment fields. Send above to start a new thread from the
+        customer&apos;s message, or select a thread and reply at the bottom as
+        the customer to continue the conversation. The agent asks only for what
+        is still open, updates the form each turn, and assembles the confirmation
+        email once every field is complete. If the first message already has full
+        details, use Assembler instead. One domestic road shipment of ordinary
+        palletized goods per thread.
+      </p>
       <AgentMessageComposer
         value={newThreadDraft}
         onChange={setNewThreadDraft}
@@ -338,7 +349,6 @@ export function ClarificationPanel() {
         showMissingKeyAlert={newThreadMissingKeyAlert}
         isSending={isSending}
         placeholder="Type or paste the simulated customer email…"
-        hint="Send starts a new thread. The agent may only handle one domestic road shipment of ordinary palletized goods. It fills the form from the customer's words and asks for what is still missing or unclear."
       />
       <AgentSendAlerts error={sendError} notice={sendNotice} />
     </>

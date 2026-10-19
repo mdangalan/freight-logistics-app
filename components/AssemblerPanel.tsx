@@ -195,12 +195,23 @@ export function AssemblerPanel() {
 
   const topBar = (
     <>
+      <p className="text-sm text-muted-foreground">
+        Assembler only assembles — it does not clarify. Paste a customer message
+        that already includes complete shipment information, then Send. The agent
+        maps the text to the seven-field form and, when every field is filled and
+        validated, assembles the outbound email that restates the facts and asks
+        the customer to confirm. It will not ask follow-up questions for missing
+        or unclear details; use Clarification for that. Set an API key in
+        Settings first. Each send creates a new item — select one below to view
+        the message, assembled reply, and form.
+      </p>
       <AgentMessageComposer
         value={draft}
         onChange={setDraft}
         onSend={handleSend}
         showMissingKeyAlert={missingKeyAlert}
         isSending={isSending}
+        placeholder="Paste a complete customer email (all shipment details included)…"
       />
       <AgentSendAlerts error={sendError} notice={sendNotice} />
     </>
