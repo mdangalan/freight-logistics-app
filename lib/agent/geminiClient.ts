@@ -15,16 +15,20 @@ function geminiModel(): string {
   return process.env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
 }
 
-export function logGeminiError(error: unknown, model: string) {
+export function logGeminiError(
+  error: unknown,
+  model: string,
+  caller = "Assembler"
+) {
   if (error instanceof ApiError) {
-    console.error("Assembler Gemini call failed", {
+    console.error(`${caller} Gemini call failed`, {
       model,
       status: error.status,
       message: error.message,
     });
     return;
   }
-  console.error("Assembler Gemini call failed", { model, error });
+  console.error(`${caller} Gemini call failed`, { model, error });
 }
 
 function shouldTryFallbackModel(error: unknown, model: string): boolean {
@@ -79,7 +83,8 @@ async function invokeGeminiModel(
 export async function invokeGeminiAssembler(
   apiKey: string,
   message: string,
-  instructions: string
+  instructions: string,
+  caller = "Assembler"
 ): Promise<AssemblerModelOutput> {
   const primaryModel = geminiModel();
   try {
@@ -90,10 +95,10 @@ export async function invokeGeminiAssembler(
       primaryModel
     );
   } catch (error) {
-    logGeminiError(error, primaryModel);
+    logGeminiError(error, primaryModel, caller);
     if (shouldTryFallbackModel(error, primaryModel)) {
       console.warn(
-        `Assembler retrying with ${FALLBACK_MODEL} (set GEMINI_MODEL in .env.local to pin a model)`
+        `${caller} retrying with ${FALLBACK_MODEL} (set GEMINI_MODEL in .env.local to pin a model)`
       );
       return await invokeGeminiModel(
         apiKey,

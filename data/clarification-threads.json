@@ -1,0 +1,254 @@
+[
+  {
+    "id": "4bec5a47-1198-40ad-9549-b0010748b56b",
+    "title": "Hi Freight Desk,",
+    "needsHuman": false,
+    "humanReason": "",
+    "inquiryStatus": "awaiting_customer",
+    "form": {
+      "customerName": {
+        "status": "filled",
+        "value": "Maya Chen, Northwind Packaging",
+        "note": ""
+      },
+      "pickupAddress": {
+        "status": "filled",
+        "value": "Lot 22, Jalan Industri 3, Shah Alam, Selangor",
+        "note": ""
+      },
+      "pickupDate": {
+        "status": "filled",
+        "value": "27 October 2026",
+        "note": ""
+      },
+      "deliveryAddress": {
+        "status": "filled",
+        "value": "18 Weld Quay, George Town, Penang",
+        "note": ""
+      },
+      "goodsDescription": {
+        "status": "filled",
+        "value": "printed packaging sleeves",
+        "note": ""
+      },
+      "palletCount": {
+        "status": "filled",
+        "value": "4",
+        "note": ""
+      },
+      "totalWeightKg": {
+        "status": "filled",
+        "value": "450",
+        "note": ""
+      }
+    },
+    "formStatus": "complete",
+    "messages": [
+      {
+        "id": "02d8704f-acd4-4c39-8e29-a3ffee51ca5f",
+        "role": "customer",
+        "content": "Hi Freight Desk,\n\nThis is Maya Chen from Northwind Packaging. Can you arrange a road collection from our Shah Alam plant next Tuesday? We have about 4–6 pallets of printed packaging sleeves going to Penang — same drop as last time is fine. Weight is around 450 kg.\n\nThanks,\nMaya",
+        "sentAt": "2026-10-19T01:51:34.098Z"
+      },
+      {
+        "id": "6360042a-864b-4389-9979-5c629f8e09e7",
+        "role": "assistant",
+        "content": "Hi Maya, thanks for reaching out. Could you please confirm the exact street address for the collection in Shah Alam, the specific pickup date (calendar date), the exact delivery street address in Penang, the exact number of pallets (digits only), and clarify whether the 450 kg is the total weight for the whole shipment or per pallet?",
+        "sentAt": "2026-10-19T01:52:10.065Z"
+      },
+      {
+        "id": "729adebf-ff11-48fb-998b-470caecf399d",
+        "role": "customer",
+        "content": "Pickup is Tuesday 27 October 2026 from Lot 22, Jalan Industri 3, Shah Alam, Selangor. Deliver to 18 Weld Quay, George Town, Penang. It's 4 pallets, 450 kg in total for the whole shipment.",
+        "sentAt": "2026-10-19T01:53:19.090Z"
+      },
+      {
+        "id": "2e9a65d0-8674-4986-a740-53769cbc8080",
+        "role": "customer",
+        "content": "Pickup is Tuesday 27 October 2026 from Lot 22, Jalan Industri 3, Shah Alam, Selangor. Deliver to 18 Weld Quay, George Town, Penang. It's 4 pallets, 450 kg in total for the whole shipment.",
+        "sentAt": "2026-10-19T01:53:53.800Z"
+      },
+      {
+        "id": "7a8c8880-9699-4163-8467-c4b46086c018",
+        "role": "assistant",
+        "content": "Please confirm the following shipment details:\n- Customer Name: Maya Chen, Northwind Packaging\n- Pickup Address: Lot 22, Jalan Industri 3, Shah Alam, Selangor\n- Pickup Date: 27 October 2026\n- Delivery Address: 18 Weld Quay, George Town, Penang\n- Goods Description: printed packaging sleeves\n- Pallet Count: 4\n- Total Weight: 450 kg",
+        "sentAt": "2026-10-19T01:55:09.338Z"
+      }
+    ],
+    "createdAt": "2026-10-19T01:51:34.098Z"
+  },
+  {
+    "id": "clar-thread-northwind-weight",
+    "title": "Northwind — confirm total weight",
+    "needsHuman": false,
+    "humanReason": "",
+    "inquiryStatus": "awaiting_customer",
+    "form": {
+      "customerName": {
+        "status": "filled",
+        "value": "Northwind Packaging",
+        "note": ""
+      },
+      "pickupAddress": {
+        "status": "filled",
+        "value": "Northwind plant, Shah Alam",
+        "note": ""
+      },
+      "pickupDate": {
+        "status": "filled",
+        "value": "2026-10-22",
+        "note": ""
+      },
+      "deliveryAddress": {
+        "status": "filled",
+        "value": "12 Dock Street, Penang",
+        "note": ""
+      },
+      "goodsDescription": {
+        "status": "filled",
+        "value": "Cartons of printed packaging",
+        "note": ""
+      },
+      "palletCount": {
+        "status": "filled",
+        "value": "4",
+        "note": ""
+      },
+      "totalWeightKg": {
+        "status": "unclear",
+        "value": "450",
+        "note": "Could be per pallet or the whole shipment"
+      }
+    },
+    "formStatus": "incomplete",
+    "messages": [
+      {
+        "id": "msg-1",
+        "role": "assistant",
+        "content": "Hi Maya — thanks for the shipment details. For 4 pallets to Penang on 22 Oct, can you confirm whether 450 kg is the total weight for the whole load, or 450 kg per pallet?",
+        "sentAt": "2026-10-18T15:00:00.000Z"
+      }
+    ],
+    "createdAt": "2026-10-18T14:55:00.000Z"
+  },
+  {
+    "id": "clar-thread-harbour-pickup",
+    "title": "Harbour & Co — pickup window",
+    "needsHuman": false,
+    "humanReason": "",
+    "inquiryStatus": "clarifying",
+    "form": {
+      "customerName": {
+        "status": "filled",
+        "value": "Harbour & Co",
+        "note": ""
+      },
+      "pickupAddress": {
+        "status": "filled",
+        "value": "88 Industrial Loop, Johor Bahru",
+        "note": ""
+      },
+      "pickupDate": {
+        "status": "unclear",
+        "value": "15 October",
+        "note": "Need a specific calendar day or collection window"
+      },
+      "deliveryAddress": {
+        "status": "filled",
+        "value": "KLIA cargo village",
+        "note": ""
+      },
+      "goodsDescription": {
+        "status": "filled",
+        "value": "Exhibition displays",
+        "note": ""
+      },
+      "palletCount": {
+        "status": "filled",
+        "value": "2",
+        "note": ""
+      },
+      "totalWeightKg": {
+        "status": "filled",
+        "value": "320",
+        "note": ""
+      }
+    },
+    "formStatus": "incomplete",
+    "messages": [
+      {
+        "id": "msg-2",
+        "role": "assistant",
+        "content": "Hello — we're arranging road freight for your exhibition displays. Could you confirm the exact pickup date at Johor Bahru (a calendar day or morning/afternoon window)?",
+        "sentAt": "2026-10-18T12:30:00.000Z"
+      },
+      {
+        "id": "msg-3",
+        "role": "customer",
+        "content": "Pickup can be 15 October, ideally before noon if possible.",
+        "sentAt": "2026-10-18T13:10:00.000Z"
+      },
+      {
+        "id": "msg-4",
+        "role": "assistant",
+        "content": "Thanks — noted 15 October before noon. I'll update the record once we have a confirmed calendar date in YYYY-MM-DD form for the carrier.",
+        "sentAt": "2026-10-18T13:12:00.000Z"
+      }
+    ],
+    "createdAt": "2026-10-18T12:00:00.000Z"
+  },
+  {
+    "id": "clar-thread-escalation",
+    "title": "Guaranteed delivery — escalated",
+    "needsHuman": true,
+    "humanReason": "Customer asked for a guaranteed delivery commitment",
+    "inquiryStatus": "clarifying",
+    "form": {
+      "customerName": {
+        "status": "missing",
+        "value": "",
+        "note": ""
+      },
+      "pickupAddress": {
+        "status": "missing",
+        "value": "",
+        "note": ""
+      },
+      "pickupDate": {
+        "status": "missing",
+        "value": "",
+        "note": ""
+      },
+      "deliveryAddress": {
+        "status": "missing",
+        "value": "",
+        "note": ""
+      },
+      "goodsDescription": {
+        "status": "missing",
+        "value": "",
+        "note": ""
+      },
+      "palletCount": {
+        "status": "missing",
+        "value": "",
+        "note": ""
+      },
+      "totalWeightKg": {
+        "status": "missing",
+        "value": "",
+        "note": ""
+      }
+    },
+    "formStatus": "incomplete",
+    "messages": [
+      {
+        "id": "msg-5",
+        "role": "customer",
+        "content": "We need this on site by Friday with a guaranteed delivery time — can you commit?",
+        "sentAt": "2026-10-18T11:00:00.000Z"
+      }
+    ],
+    "createdAt": "2026-10-18T11:05:00.000Z"
+  }
+]

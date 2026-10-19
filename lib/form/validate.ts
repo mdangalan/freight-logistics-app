@@ -275,7 +275,7 @@ function normalizeProposedField(
   return unclearField(value, note);
 }
 
-function statedInChat(value: string, chatText: string): boolean {
+export function valueAppearsInChat(value: string, chatText: string): boolean {
   const needle = value.trim().toLowerCase();
   if (!needle) return false;
   if (needle.length >= 3) {
@@ -323,7 +323,7 @@ export function stripUnstatedHistoryValues(
       (historyValue) =>
         historyValue.toLowerCase() === field.value.trim().toLowerCase()
     );
-    if (matchesHistory && !statedInChat(field.value, chatText)) {
+    if (matchesHistory && !valueAppearsInChat(field.value, chatText)) {
       next[key] = missingField();
     }
   }

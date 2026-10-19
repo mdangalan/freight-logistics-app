@@ -15,6 +15,7 @@ type CustomerReplyComposerProps = {
   label?: string;
   placeholder?: string;
   hint?: string;
+  isSending?: boolean;
 };
 
 export function CustomerReplyComposer({
@@ -25,10 +26,11 @@ export function CustomerReplyComposer({
   missingKeyContext,
   label = "Simulated customer reply",
   placeholder = "Type the customer's email reply…",
-  hint = "Send is not wired yet — this previews the per-thread reply flow.",
+  hint = "The agent reads this reply, updates the form, and asks only what is still open.",
+  isSending = false,
 }: CustomerReplyComposerProps) {
   return (
-    <div className="space-y-3 rounded-lg border border-dashed border-border/80 bg-muted/20 p-4">
+    <div className="space-y-3">
       <div className="space-y-1">
         <Label htmlFor="customer-reply">{label}</Label>
         {hint ? (
@@ -41,9 +43,15 @@ export function CustomerReplyComposer({
         className="min-h-20 resize-y"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        disabled={isSending}
       />
       <div className="flex flex-wrap items-center gap-2">
-        <Button type="button" onPress={onSend}>
+        <Button
+          type="button"
+          onPress={onSend}
+          isPending={isSending}
+          isDisabled={isSending || !value.trim()}
+        >
           <SendIcon />
           Send
         </Button>

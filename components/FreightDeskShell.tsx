@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { AgentPlaceholder } from "@/components/AgentPlaceholder";
 import { AssemblerPanel } from "@/components/AssemblerPanel";
 import { ClarificationPanel } from "@/components/ClarificationPanel";
@@ -44,21 +46,45 @@ const NAV: {
   { section: "settings", label: "Settings", icon: SettingsIcon },
 ];
 
+function KeepAlivePanel({
+  active,
+  children,
+}: {
+  active: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className={
+        active
+          ? "flex min-h-0 flex-1 flex-col overflow-hidden"
+          : "hidden"
+      }
+      aria-hidden={!active}
+      inert={!active}
+    >
+      {children}
+    </div>
+  );
+}
+
 function MainWindow() {
   const section = useVisitStore((s) => s.section);
 
-  switch (section) {
-    case "assembler":
-      return <AssemblerPanel />;
-    case "clarification":
-      return <ClarificationPanel />;
-    case "booking":
-      return <AgentPlaceholder agentName="Booking Agent" />;
-    case "settings":
-      return <SettingsPanel />;
-    default:
-      return null;
-  }
+  return (
+    <>
+      <KeepAlivePanel active={section === "assembler"}>
+        <AssemblerPanel />
+      </KeepAlivePanel>
+      <KeepAlivePanel active={section === "clarification"}>
+        <ClarificationPanel />
+      </KeepAlivePanel>
+      {section === "booking" ? (
+        <AgentPlaceholder agentName="Booking Agent" />
+      ) : null}
+      {section === "settings" ? <SettingsPanel /> : null}
+    </>
+  );
 }
 
 export function FreightDeskShell() {

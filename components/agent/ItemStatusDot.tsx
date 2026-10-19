@@ -1,16 +1,21 @@
 import { cn } from "@/lib/utils";
 
-type ItemStatusDotProps = {
-  needsHuman: boolean;
+export type StatusTone = "ok" | "waiting" | "human";
+
+const TONE_DOT: Record<StatusTone, string> = {
+  ok: "bg-emerald-500",
+  waiting: "bg-orange-500",
+  human: "bg-red-500",
 };
 
-export function ItemStatusDot({ needsHuman }: ItemStatusDotProps) {
+type ItemStatusDotProps = {
+  tone?: StatusTone;
+};
+
+export function ItemStatusDot({ tone = "ok" }: ItemStatusDotProps) {
   return (
     <span
-      className={cn(
-        "mt-1.5 size-2.5 shrink-0 rounded-full",
-        needsHuman ? "bg-amber-500" : "bg-emerald-500"
-      )}
+      className={cn("mt-1.5 size-2.5 shrink-0 rounded-full", TONE_DOT[tone])}
       aria-hidden
     />
   );

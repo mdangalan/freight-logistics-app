@@ -1,6 +1,6 @@
 import { connection } from "next/server";
 
-import { runAssemblerSend } from "@/lib/agent/assemble";
+import { runAssemblerSend } from "@/lib/agent/assembler/assemble";
 import {
   DEFAULT_LLM_PROVIDER,
   parseLlmProvider,

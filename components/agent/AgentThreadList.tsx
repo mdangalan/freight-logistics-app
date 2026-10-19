@@ -1,3 +1,4 @@
+import { type StatusTone } from "@/components/agent/ItemStatusDot";
 import { ThreadListRow } from "@/components/agent/ThreadListRow";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -6,6 +7,7 @@ export type AgentThreadListEntry = {
   title: string;
   subtitle?: string;
   needsHuman: boolean;
+  tone?: StatusTone;
   createdAt: string;
 };
 
@@ -44,7 +46,7 @@ export function AgentThreadList({
                 key={item.id}
                 title={item.title}
                 subtitle={item.subtitle}
-                needsHuman={item.needsHuman}
+                tone={item.tone ?? (item.needsHuman ? "human" : "ok")}
                 isSelected={item.id === selectedId}
                 onSelect={() => onSelect(item.id)}
               />

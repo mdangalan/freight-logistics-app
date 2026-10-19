@@ -15,9 +15,13 @@ function openaiModel(): string {
   return process.env.OPENAI_MODEL?.trim() || DEFAULT_MODEL;
 }
 
-export function logOpenAiError(error: unknown, model: string) {
+export function logOpenAiError(
+  error: unknown,
+  model: string,
+  caller = "Assembler"
+) {
   if (error instanceof OpenAI.APIError) {
-    console.error("Assembler OpenAI call failed", {
+    console.error(`${caller} OpenAI call failed`, {
       model,
       status: error.status,
       code: error.code,
@@ -26,7 +30,7 @@ export function logOpenAiError(error: unknown, model: string) {
     });
     return;
   }
-  console.error("Assembler OpenAI call failed", { model, error });
+  console.error(`${caller} OpenAI call failed`, { model, error });
 }
 
 function shouldTryFallbackModel(error: unknown, model: string): boolean {
@@ -95,16 +99,17 @@ async function invokeOpenAiModel(
 export async function invokeOpenAiAssembler(
   apiKey: string,
   message: string,
-  instructions: string
+  instructions: string,
+  caller = "Assembler"
 ): Promise<AssemblerModelOutput> {
   const primaryModel = openaiModel();
   try {
     return await invokeOpenAiModel(apiKey, message, instructions, primaryModel);
   } catch (error) {
-    logOpenAiError(error, primaryModel);
+    logOpenAiError(error, primaryModel, caller);
     if (shouldTryFallbackModel(error, primaryModel)) {
       console.warn(
-        `Assembler retrying with ${FALLBACK_MODEL} (set OPENAI_MODEL in .env.local to pin a model)`
+        `${caller} retrying with ${FALLBACK_MODEL} (set OPENAI_MODEL in .env.local to pin a model)`
       );
       return await invokeOpenAiModel(
         apiKey,

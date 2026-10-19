@@ -1,7 +1,7 @@
 import {
   ASSEMBLER_PROMPT,
   fillAssemblerPrompt,
-} from "@/lib/agent/assemblerPrompt";
+} from "@/lib/agent/assembler/prompt";
 import { invokeCursorAssembler } from "@/lib/agent/cursorClient";
 import { invokeGeminiAssembler, logGeminiError } from "@/lib/agent/geminiClient";
 import { applyAssemblerGuardrail } from "@/lib/agent/guardrail";

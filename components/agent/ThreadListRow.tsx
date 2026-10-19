@@ -1,10 +1,16 @@
-import { ItemStatusDot } from "@/components/agent/ItemStatusDot";
+import { ItemStatusDot, type StatusTone } from "@/components/agent/ItemStatusDot";
 import { cn } from "@/lib/utils";
+
+const TONE_SUBTITLE: Record<StatusTone, string> = {
+  ok: "text-muted-foreground",
+  waiting: "text-orange-800 dark:text-orange-200",
+  human: "text-red-800 dark:text-red-200",
+};
 
 export type ThreadListRowProps = {
   title: string;
   subtitle?: string;
-  needsHuman: boolean;
+  tone?: StatusTone;
   isSelected: boolean;
   onSelect: () => void;
 };
@@ -12,7 +18,7 @@ export type ThreadListRowProps = {
 export function ThreadListRow({
   title,
   subtitle,
-  needsHuman,
+  tone = "ok",
   isSelected,
   onSelect,
 }: ThreadListRowProps) {
@@ -25,18 +31,11 @@ export function ThreadListRow({
         isSelected ? "border-primary/40 bg-muted/80" : "border-transparent"
       )}
     >
-      <ItemStatusDot needsHuman={needsHuman} />
+      <ItemStatusDot tone={tone} />
       <div className="min-w-0 flex-1 space-y-0.5">
         <p className="truncate font-medium">{title}</p>
         {subtitle ? (
-          <p
-            className={cn(
-              "line-clamp-2 text-xs",
-              needsHuman
-                ? "text-amber-800 dark:text-amber-200"
-                : "text-muted-foreground"
-            )}
-          >
+          <p className={cn("line-clamp-2 text-xs", TONE_SUBTITLE[tone])}>
             {subtitle}
           </p>
         ) : null}

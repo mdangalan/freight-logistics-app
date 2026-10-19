@@ -1,3 +1,4 @@
+import { AssistantTypingIndicator } from "@/components/agent/AssistantTypingIndicator";
 import { ConversationMessageBubble } from "@/components/agent/ConversationMessageBubble";
 import type { ClarificationMessage } from "@/lib/form/catalog";
 import { cn } from "@/lib/utils";
@@ -7,6 +8,7 @@ type ConversationTimelineProps = {
   className?: string;
   agentLabel?: string;
   heading?: string;
+  awaitingReply?: boolean;
 };
 
 export function ConversationTimeline({
@@ -14,6 +16,7 @@ export function ConversationTimeline({
   className,
   agentLabel = "Clarification agent",
   heading = "Conversation",
+  awaitingReply = false,
 }: ConversationTimelineProps) {
   return (
     <section className={cn("space-y-3", className)}>
@@ -30,6 +33,9 @@ export function ConversationTimeline({
             agentLabel={agentLabel}
           />
         ))}
+        {awaitingReply ? (
+          <AssistantTypingIndicator agentLabel={agentLabel} />
+        ) : null}
       </div>
     </section>
   );

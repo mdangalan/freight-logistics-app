@@ -30,7 +30,7 @@ export function HumanReviewHeader({
             {needsHuman ? (
               <Badge
                 variant="secondary"
-                className="bg-amber-500/15 text-amber-900 dark:text-amber-100"
+                className="bg-red-500/15 text-red-900 dark:text-red-100"
               >
                 Needs a person
               </Badge>
@@ -56,9 +56,9 @@ export function HumanReviewHeader({
         ) : null}
       </div>
       {needsHuman && humanReason ? (
-        <Alert className="border-amber-500/30 bg-amber-500/5">
-          <AlertCircleIcon className="text-amber-600" />
-          <AlertTitle className="text-amber-950 dark:text-amber-50">
+        <Alert className="border-red-500/30 bg-red-500/5">
+          <AlertCircleIcon className="text-red-600" />
+          <AlertTitle className="text-red-950 dark:text-red-50">
             Reason
           </AlertTitle>
           <AlertDescription>{humanReason}</AlertDescription>

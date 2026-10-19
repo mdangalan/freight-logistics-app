@@ -2,15 +2,11 @@
 
 import { create } from "zustand";
 
-import mockClarificationThreads from "@/data/mock-clarification-threads.json";
 import {
   DEFAULT_LLM_PROVIDER,
   type LlmProvider,
 } from "@/lib/agent/provider";
 import type { AssemblerItem, ClarificationThread } from "@/lib/form/catalog";
-
-const MOCK_CLARIFICATION_THREADS =
-  mockClarificationThreads as ClarificationThread[];
 
 export type VisitSection =
   | "assembler"
@@ -20,6 +16,10 @@ export type VisitSection =
 
 function newestFirst(items: AssemblerItem[]): AssemblerItem[] {
   return [...items].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+function newestThreads(threads: ClarificationThread[]): ClarificationThread[] {
+  return [...threads].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 type VisitState = {
@@ -38,18 +38,18 @@ type VisitState = {
   setItems: (items: AssemblerItem[]) => void;
   upsertItem: (item: AssemblerItem) => void;
   clearHumanFlag: (itemId: string) => void;
-  clearClarificationHumanFlag: (threadId: string) => void;
+  setClarificationThreads: (threads: ClarificationThread[]) => void;
+  upsertClarificationThread: (thread: ClarificationThread) => void;
 };
 
 export const useVisitStore = create<VisitState>((set) => ({
   section: "assembler",
   selectedItemId: null,
-  selectedClarificationThreadId:
-    MOCK_CLARIFICATION_THREADS[0]?.id ?? null,
+  selectedClarificationThreadId: null,
   llmProvider: DEFAULT_LLM_PROVIDER,
   apiKey: "",
   items: [],
-  clarificationThreads: MOCK_CLARIFICATION_THREADS,
+  clarificationThreads: [],
   setSection: (section) => set({ section }),
   setSelectedItemId: (selectedItemId) => set({ selectedItemId }),
   setSelectedClarificationThreadId: (selectedClarificationThreadId) =>
@@ -72,12 +72,15 @@ export const useVisitStore = create<VisitState>((set) => ({
           : item
       ),
     })),
-  clearClarificationHumanFlag: (threadId) =>
+  setClarificationThreads: (threads) =>
+    set({ clarificationThreads: newestThreads(threads) }),
+  upsertClarificationThread: (thread) =>
     set((state) => ({
-      clarificationThreads: state.clarificationThreads.map((thread) =>
-        thread.id === threadId
-          ? { ...thread, needsHuman: false, humanReason: "" }
-          : thread
-      ),
+      clarificationThreads: newestThreads([
+        thread,
+        ...state.clarificationThreads.filter(
+          (existing) => existing.id !== thread.id
+        ),
+      ]),
     })),
 }));

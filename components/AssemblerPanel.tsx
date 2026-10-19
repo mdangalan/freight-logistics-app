@@ -86,6 +86,10 @@ export function AssemblerPanel() {
   const [draft, setDraft] = useState("");
   const [missingKeyAlert, setMissingKeyAlert] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [pendingSend, setPendingSend] = useState<{
+    content: string;
+    sentAt: string;
+  } | null>(null);
   const [sendError, setSendError] = useState("");
   const [sendNotice, setSendNotice] = useState("");
 
@@ -136,6 +140,7 @@ export function AssemblerPanel() {
     setMissingKeyAlert(false);
     setSendError("");
     setSendNotice("");
+    setPendingSend({ content: message, sentAt: new Date().toISOString() });
     setIsSending(true);
     try {
       const response = await fetch("/api/assembler", {
@@ -170,6 +175,7 @@ export function AssemblerPanel() {
       setSendError("The assistant could not answer. Try again.");
     } finally {
       setIsSending(false);
+      setPendingSend(null);
     }
   }
 
@@ -221,7 +227,24 @@ export function AssemblerPanel() {
       />
 
       <div className="min-h-0 flex-1 overflow-y-auto">
-        {selectedItem ? (
+        {pendingSend ? (
+          <Card className="border-border/80 shadow-sm">
+            <CardContent>
+              <ConversationTimeline
+                messages={[
+                  {
+                    id: "pending-customer",
+                    role: "customer",
+                    content: pendingSend.content,
+                    sentAt: pendingSend.sentAt,
+                  },
+                ]}
+                agentLabel="Assembler agent"
+                awaitingReply
+              />
+            </CardContent>
+          </Card>
+        ) : selectedItem ? (
           <AssemblerItemDetail item={selectedItem} />
         ) : (
           <AgentDetailPlaceholder message="Select an item to view the message, reply, and shipment form." />
